@@ -32,7 +32,7 @@
 
     /* LAYOUT */
     .main { margin-top:var(--th); display:flex; height:calc(100vh - var(--th)); overflow:hidden; }
-    .left { flex:1; min-width:0; overflow-y:auto; background:var(--bg); display:flex; flex-direction:column; }
+    .left { flex:3; min-width:0; overflow-y:auto; background:var(--bg); display:flex; flex-direction:column; }
 
     /* NAV HEADER */
     .normal-hdr { background:var(--sur); border-bottom:1px solid var(--bdr); flex-shrink:0; }
@@ -307,7 +307,7 @@
     .fmt-row{display:flex;gap:6px;}
     .fmtc{flex:1;padding:10px 6px;border-radius:9px;border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--t2);transition:all .15s;}
     .fmtc:hover,.fmtc.sel{border-color:var(--purple);background:var(--purple-lt);color:var(--purple);}
-    .fmt-ic{font-size:18px;} .fmt-sub{font-size:10px;color:var(--t3);}
+    .fmt-ic{font-size:22px;line-height:1;} .fmt-sub{font-size:10px;color:var(--t3);}
     .fmtc.sel .fmt-sub{color:#C4B5FD;}
     .conf-row{display:flex;gap:6px;}
     .btn-sec{flex:1;padding:8px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:background .15s;}
@@ -424,7 +424,7 @@
       <div class="tabs-bar">
         <div class="tab" id="tab-res" onclick="switchTab('res')">Resumen</div>
         <div class="tab active" id="tab-act" onclick="switchTab('act')">Promociones activas</div>
-        <div class="tab" id="tab-rep" onclick="switchTab('rep')">Reportes</div>
+        <div class="tab" id="tab-rep" onclick="switchTab('rep')">Reportes <span class="tab-badge" id="rep-badge">2</span></div>
       </div>
     </div>
 
@@ -799,7 +799,7 @@ function tg(grp, el) {
 let lastTab = 'act';
 function switchTab(t) {
   lastTab = t;
-  ['res','act'].forEach(id=>{
+  ['res','act','rep'].forEach(id=>{
     document.getElementById('tab-'+id).classList.toggle('active', id===t);
     document.getElementById('view-'+id).classList.toggle('show', id===t);
     document.getElementById('view-'+id).classList.toggle('hidden', id!==t);
@@ -1007,24 +1007,28 @@ function buildDetail(p) {
 // ── CHAT ────────────────────────────────────────────────
 const QS = {
   q1:{q:'¿A qué precio puedo salir con áticos?',
-    intro:'Los comparables activos muestran un rango sólido de <strong>3.200–3.800€/m²</strong> para áticos en la zona. Torres del Parque lidera con 3.800€/m² y 28 días de absorción. Granados está en el tramo bajo con precio estable.',
-    chart:cQ1, concl:{type:'green',title:'Rango recomendado de salida',items:['Ático 3h → 3.500–3.800€/m²','Ático 2h → 3.400–3.600€/m²','Planta 2-3h → 3.000–3.200€/m²']},
-    nqs:[['¿Qué tipología me recomiendas?','q2'],['Si lanzo 60 uds, ¿cuánto tardo?','q3']]},
+    intro:'Torres del Parque marca el techo del mercado con <strong>3.800€/m²</strong> y 28 días de absorción — y sigue subiendo. La oferta es tan escasa (4 promociones en toda la zona) que el mercado aguanta alzas sin resistencia visible.<br><br>Precio recomendado de salida según tipología:<br>• <strong>Ático 3h</strong> → 3.500–3.800€/m² — máxima demanda y sin competencia directa. Puedes salir en la banda alta si la ubicación y calidad lo sostienen.<br>• <strong>Ático 2h</strong> → 3.400–3.600€/m² — gap de mercado real. Con solo 5 uds activas en la zona, puedes posicionarte agresivo sin riesgo de quedarte fuera de mercado.<br>• <strong>Planta 3h</strong> → 3.100–3.300€/m² — el segmento más competido. Calibra bien frente a Granados (3.100€/m², precio estable).<br>• <strong>Planta 2h</strong> → 3.000–3.200€/m² — acceso al comprador de reposición. Precio más sensible; no subas sin ver absorción.<br><br>Estrategia recomendada: <strong>salir por encima del mercado en áticos</strong> (puedes permitirte 3.600–3.700€/m²) y en línea con el líder en plantas.',
+    chart:cQ1,
+    concl:{type:'green',title:'Rango recomendado de salida',items:['Ático 3h → 3.500–3.800€/m² · salir arriba','Ático 2h → 3.400–3.600€/m² · gap, posición agresiva','Planta 3h → 3.100–3.300€/m² · calibrar frente a Granados','Planta 2h → 3.000–3.200€/m² · no subas sin ver absorción']},
+    nqs:[['¿Qué tipología me recomiendas?','q2'],['Si lanzo 60 uds, ¿cuánto tardo?','q3'],['¿Qué hueco no cubre nadie?','q4']]},
   q2:{q:'¿Qué tipología me recomiendas?',
-    intro:'El mix óptimo concentra el <strong>85% en pisos y áticos de 2-3 habitaciones</strong>. Los bajos tienen demanda débil en Sabadell. La superficie que mejor funciona: 70–85m².',
-    chart:cQ2, warn:'Estimación orientativa basada en comportamiento histórico de unidades similares. No es una proyección garantizada.',
-    nqs:[['Si lanzo 60 uds, ¿cuánto tardo?','q3'],['¿A qué precio puedo salir con áticos?','q1']]},
+    intro:'Basándome en absorción, movimiento de precios y escasez de oferta en Sabadell, el mix óptimo para maximizar ritmo de ventas y margen es el siguiente:<br><br>• <strong>Ático 3h (25%)</strong> — el producto estrella del mercado. Absorción media 18 días y subida de precio +6,2%. Sin oferta nueva en construcción. Si puedes incluir áticos 3h, son los primeros en venderse y te dan el margen más alto.<br>• <strong>Ático 2h (20%)</strong> — gap de mercado real: solo 5 uds activas en toda la zona. Absorción 18–24 días. Nadie lo trabaja como producto principal. Oportunidad directa.<br>• <strong>Planta 3h (30%)</strong> — base sólida del mix. Mayor volumen de demanda activa en el segmento medio-alto (300.000–480.000€). Absorción 22–28 días con precio estable.<br>• <strong>Planta 2h (25%)</strong> — acceso al comprador de reposición y primera vivienda con capacidad. Absorción 28–34 días. Líquida si el precio está bien calibrado.<br><br><strong>Qué evitar sin dudar:</strong> Bajos (−5,1% precio, 200 días en mercado, ningún promotor los sube) y Planta 4h (0 retiradas en toda la zona, absorción estimada +300 días). Incluirlos destruye el ritmo de comercialización del conjunto.<br><br>Superficie que mejor funciona: <strong>70–85 m²</strong>. Precio objetivo: <strong>3.200–3.800€/m²</strong> según tipología.',
+    chart:cQ2,
+    concl:{type:'green',title:'Mix recomendado para maximizar ritmo y margen',items:['25% Ático 3h · producto estrella, máximo margen','20% Ático 2h · gap de mercado, nadie lo trabaja bien','30% Planta 3h · volumen base, demanda activa','25% Planta 2h · acceso a reposición, precio sensible']},
+    warn:'Estimación orientativa basada en el comportamiento histórico de las 4 promociones activas en Sabadell. No es una proyección garantizada.',
+    nqs:[['Si lanzo 60 uds, ¿cuánto tardo?','q3'],['¿A qué precio puedo salir con áticos?','q1'],['¿Qué hueco no cubre nadie?','q4']]},
   q3:{q:'Si lanzo 60 uds, ¿cuánto tardo?',
-    intro:'Con 60 unidades el plazo varía enormemente según el mix. El escenario A con mix óptimo te da <strong>8–10 meses</strong>. Incluir bajos o 4h alarga el proceso de forma significativa.',
-    chart:cQ3, warn:'Estimación orientativa basada en comportamiento histórico de unidades similares. No es una proyección garantizada.',
-    concl:{type:'blue',title:'✦  Escenario A es el que presentarías al banco',items:['Mix óptimo: áticos + plantas 2-3h, sin bajos ni 4h.']},
+    intro:'Con 60 unidades el plazo depende casi por completo del mix que elijas. El escenario A con mix óptimo te da <strong>8–10 meses</strong> — perfectamente bancable. Incluir bajos lo alarga un 60%. Incluir 4h puede duplicarlo.<br><br>El mercado de Sabadell absorbe ~15–18 unidades/mes en el segmento áticos y plantas 2-3h, pero solo 3–4 unidades/mes en bajos y prácticamente 0 en planta 4h. Un error de mix puede convertir un proyecto de 10 meses en uno de 28. La diferencia no es de marketing — es de qué construyes.<br><br>Referencia real: Torres del Parque (24 uds, mix óptimo) lleva 3,2 uds/mes → al 90% antes de la entrega. Central Park (18 uds con 4h) lleva solo 1,2 uds/mes en ese segmento.',
+    chart:cQ3,
+    warn:'Estimación orientativa basada en el ritmo de absorción observado en las promociones activas de la zona. No es una proyección garantizada.',
+    concl:{type:'blue',title:'✦ Escenario A es el que presentarías al banco',items:['Mix óptimo: áticos + plantas 2-3h, sin bajos ni 4h','60 uds en 8–10 meses · ~6–7 uds/mes de ritmo objetivo','Financiación: este escenario aguanta un project finance estándar']},
     nqs:[['¿Qué tipología me recomiendas?','q2'],['¿A qué precio puedo salir con áticos?','q1']]},
   q4:{q:'¿Qué hueco no cubre nadie?',
-    intro:'El hueco más claro son los <strong>áticos de 2 habitaciones</strong>. Solo 5 unidades activas en toda la zona, absorción 18–31 días. Torres del Parque casi las tiene vendidas.',
+    intro:'El hueco más claro y accionable son los <strong>áticos de 2 habitaciones</strong>. Situación actual en Sabadell:<br>• Solo <strong>5 unidades activas</strong> en toda la zona<br>• Torres del Parque las tiene prácticamente vendidas — absorción media <strong>18 días</strong><br>• Ninguna promoción en pipeline las trabaja como producto principal<br>• Precio de mercado: 3.400–3.600€/m² — con margen al alza por escasez real<br><br>Segundo hueco significativo: <strong>Planta 3h por debajo de 450.000€</strong>. Granados tiene algo de stock a 440.000€ que se mueve bien, pero es escaso. Si puedes posicionarte en ese rango, hay demanda directa sin cubrir.<br><br>Tercer hueco (emergente): <strong>vivienda eficiente A+/A en zona norte</strong>. El comprador cada vez más filtra por certificado energético. Solo Torres del Parque tiene A. El resto está en B o sin dato. Esto va a ser ventaja competitiva en 12–18 meses.',
     chart:cQ4,
-    nqs:[['Compara Torres del Parque vs Pau Casals','q5'],['¿A qué precio puedo salir con áticos?','q1']]},
+    nqs:[['Compara Torres del Parque vs Pau Casals','q5'],['¿A qué precio puedo salir con áticos?','q1'],['¿Qué tipología me recomiendas?','q2']]},
   q5:{q:'Compara Torres del Parque vs Pau Casals',
-    intro:'La diferencia es estructural. Torres del Parque está en ritmo de líder: <strong>+4,8% en precio</strong> y 3,2 uds/mes. Pau Casals no vende — bajó precio y sigue sin mover.',
+    intro:'La diferencia entre ambas es estructural, no de timing. Torres del Parque está en modo líder: sube precio, vende rápido y tiene tracción clara. Pau Casals está en dificultad real: bajó precio hace 6 días y sigue sin mover unidades.<br><br>El problema de Pau Casals no es el precio en sí — es el segmento. El mercado premium +1,3M€ en Sabadell tiene demanda muy limitada. Con 8 unidades y solo 3 retiradas en 5 meses, el ritmo es ~0,6 uds/mes. A ese ritmo, necesitaría más de 8 meses para liquidar las 5 restantes — y con riesgo de otra bajada de precio en el camino.<br><br>Torres del Parque, en cambio, está en el segmento de máxima demanda (295.000–640.000€) y tiene margen para seguir subiendo. Ya marcó el techo de zona; cualquier promoción nueva debería aspirar a acompañarle, no a competir con Pau Casals.',
     chart:cQ5,
     nqs:[['¿Qué hueco no cubre nadie?','q4'],['¿A qué precio puedo salir con áticos?','q1']]}
 };
@@ -1047,28 +1051,63 @@ function dlCsv(rows,name){
   a.download=name+'.csv'; a.click();
 }
 function cQ1(){
-  const csv=[['Tipología','€/m²','Cambio'],['Ático 3h · Torres del Parque','3800','+3.8%'],['Ático 3h · Creu Alta','3600','+2.5%'],['Ático 2h · Torres del Parque','3500','+3.1%'],['Planta 2h · Torres del Parque','3300','+3.3%'],['Ático 2h · Granados','3200','estable']];
-  return`<div class="cbox-wrap"><div class="cbox"><div class="cttl">Comparables €/m² por tipología</div><div class="hb-row">${[
-    {l:'Ático 3h · Torres del Parque',v:'3.800€',w:110,d:'↑+3,8%',c:'f-gd'},
-    {l:'Ático 3h · Creu Alta',v:'3.600€',w:104,d:'↑+2,5%',c:'f-gm'},
-    {l:'Ático 2h · Torres del Parque',v:'3.500€',w:101,d:'↑+3,1%',c:'f-gm'},
-    {l:'Planta 2h · Torres del Parque',v:'3.300€',w:95,d:'↑+3,3%',c:'f-bl'},
-    {l:'Ático 2h · Granados',v:'3.200€',w:92,d:'estable',c:'f-bl'},
-  ].map(b=>`<div class="hb-item"><div class="hb-lbl">${b.l}</div><div class="hb-track"><div class="hb-fill ${b.c}" style="width:${b.w}px"></div><span class="hb-val">${b.v}</span><span class="hb-d ${b.d.startsWith('↑')?'up':'fl'}">${b.d}</span></div></div>`).join('')}</div></div>${dlRow(csv,'comparables_precio')}</div>`;}
+  const csv=[['Tipología','€/m²','Cambio'],['Ático 3h · Torres del Parque','3800','+3.8%'],['Ático 3h · Creu Alta','3600','+2.5%'],['Ático 2h · Torres del Parque','3500','+3.1%'],['Planta 3h · Granados','3300','+0%'],['Planta 2h · Torres del Parque','3200','+3.3%']];
+  return`<div class="cbox-wrap"><div class="cbox" style="min-width:300px"><div class="cttl">Comparables €/m² — Sabadell activos</div><div class="hb-row">${[
+    {l:'Ático 3h · Torres del Parque',v:'3.800 €/m²',w:160,d:'↑ +3,8%',c:'f-gd'},
+    {l:'Ático 3h · Creu Alta',         v:'3.600 €/m²',w:152,d:'↑ +2,5%',c:'f-gd'},
+    {l:'Ático 2h · Torres del Parque', v:'3.500 €/m²',w:147,d:'↑ +3,1%',c:'f-gm'},
+    {l:'Planta 3h · Granados',          v:'3.300 €/m²',w:139,d:'estable', c:'f-bl'},
+    {l:'Planta 2h · Torres del Parque', v:'3.200 €/m²',w:134,d:'↑ +3,3%',c:'f-bl'},
+  ].map(b=>`<div class="hb-item">
+    <div class="hb-lbl">${b.l}</div>
+    <div class="hb-track">
+      <div class="hb-fill ${b.c}" style="width:${b.w}px;height:9px;border-radius:4px;flex-shrink:0"></div>
+      <span class="hb-val" style="font-size:12px;font-weight:700">${b.v}</span>
+      <span class="hb-d ${b.d.startsWith('↑')?'up':'fl'}" style="font-size:11px">${b.d}</span>
+    </div>
+  </div>`).join('')}</div></div>${dlRow(csv,'comparables_precio')}</div>`;}
 function cQ2(){
-  const csv=[['Tipología','Mix %','Absorción'],['Áticos 2-3h','40%','18-28 días'],['Plantas 2-3h','45%','22-34 días'],['Bajos ext.','15%','~40 días']];
-  return`<div class="cbox-wrap"><div class="cbox"><div class="cttl">Mix recomendado + absorción</div><div class="vb-area" style="height:100px">${[
-    {p:'40%',h:80,c:'#34D399',l:'Áticos<br>2-3h',d:'18-28d'},
-    {p:'45%',h:90,c:'#93C5FD',l:'Plantas<br>2-3h',d:'22-34d'},
-    {p:'15%',h:30,c:'#D1D5DB',l:'Bajos<br>ext.',d:'~40d'},
-  ].map(c=>`<div class="vb-col"><div class="vb-pct">${c.p}</div><div class="vb-bar" style="height:${c.h}px;background:${c.c}"></div><div class="vb-lbl">${c.l}</div><div class="vb-days">${c.d}</div></div>`).join('')}</div></div>${dlRow(csv,'mix_tipologias')}</div>`;}
+  const csv=[['Tipología','Mix %','Absorción','€/m²'],['Ático 3h','25%','~18 días','3.500–3.800'],['Ático 2h','20%','~24 días','3.400–3.600'],['Planta 3h','30%','~28 días','3.100–3.300'],['Planta 2h','25%','~34 días','3.000–3.200']];
+  return`<div class="cbox-wrap"><div class="cbox" style="min-width:300px"><div class="cttl">Mix recomendado por tipología</div><div class="hb-row">${[
+    {l:'Ático 3h',    pct:'25%', w:100, c:'f-gd', d:'~18 días · ↑ mayor demanda',  pr:'3.500–3.800€/m²'},
+    {l:'Ático 2h',    pct:'20%', w:80,  c:'f-gd', d:'~24 días · gap de mercado',   pr:'3.400–3.600€/m²'},
+    {l:'Planta 3h',   pct:'30%', w:120, c:'f-gm', d:'~28 días · volumen base',     pr:'3.100–3.300€/m²'},
+    {l:'Planta 2h',   pct:'25%', w:100, c:'f-bl', d:'~34 días · acceso reposición',pr:'3.000–3.200€/m²'},
+  ].map(b=>`<div class="hb-item">
+    <div class="hb-lbl" style="display:flex;justify-content:space-between;gap:8px">
+      <span><strong style="color:var(--text)">${b.l}</strong> · <span style="font-weight:700;color:var(--purple)">${b.pct}</span></span>
+      <span style="color:var(--t3);font-size:10px">${b.pr}</span>
+    </div>
+    <div class="hb-track">
+      <div class="hb-fill ${b.c}" style="width:${b.w}px;height:9px;border-radius:4px;flex-shrink:0"></div>
+      <span class="hb-d up" style="font-size:11px">${b.d}</span>
+    </div>
+  </div>`).join('')}
+  <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--bdr);display:flex;gap:6px;align-items:flex-start">
+    <span style="font-size:13px;flex-shrink:0">❌</span>
+    <span style="font-size:11px;color:var(--red);font-weight:500;line-height:1.5">Evitar: <strong>Bajos</strong> (−5,1% precio · 200 días en mercado) · <strong>Planta 4h</strong> (0 retiradas en toda la zona)</span>
+  </div>
+  </div>${dlRow(csv,'mix_tipologias')}</div>`;}
 function cQ3(){
-  const csv=[['Escenario','Meses'],['A - mix óptimo','8-10'],['B - conservador con bajos','14-18'],['C - incluye 4h','22-28']];
-  return`<div class="cbox-wrap"><div class="cbox"><div class="cttl">Escenarios de comercialización · 60 uds</div><div class="sc-rows">${[
-    {l:'Escenario A<br><span style="font-size:9px;color:var(--t3)">mix óptimo</span>',r:'8–10 meses',w:110,bg:'#059669'},
-    {l:'Escenario B<br><span style="font-size:9px;color:var(--t3)">mix conservador con bajos</span>',r:'14–18 meses',w:190,bg:'#F59E0B'},
-    {l:'Escenario C<br><span style="font-size:9px;color:var(--t3)">incluye 4h</span>',r:'22–28 meses',w:280,bg:'#EF4444'},
-  ].map(s=>`<div class="sc-item"><div class="sc-lbl">${s.l}</div><div class="sc-bar" style="width:${s.w}px;background:${s.bg}"><span>${s.r}</span></div></div>`).join('')}</div></div>${dlRow(csv,'escenarios_comercializacion')}</div>`;}
+  const csv=[['Escenario','Mix','Meses estimados'],['A — mix óptimo','Áticos + plantas 2-3h','8–10'],['B — con bajos','Mix conservador con bajos','14–18'],['C — incluye 4h','Mix con planta 4 habitaciones','22–28']];
+  return`<div class="cbox-wrap"><div class="cbox" style="min-width:300px"><div class="cttl">Escenarios de comercialización · 60 unidades</div><div class="sc-rows">${[
+    {label:'Escenario A', sub:'Áticos + plantas 2-3h · sin bajos ni 4h', meses:'8–10 meses',  w:72,  bg:'#059669', txt:'#fff'},
+    {label:'Escenario B', sub:'Mix con bajos exterior incluidos',          meses:'14–18 meses', w:129, bg:'#F59E0B', txt:'#fff'},
+    {label:'Escenario C', sub:'Mix con planta 4 habitaciones',             meses:'22–28 meses', w:200, bg:'#EF4444', txt:'#fff'},
+  ].map(s=>`<div class="sc-item" style="margin-bottom:2px">
+    <div class="sc-lbl" style="font-size:12px;margin-bottom:5px">
+      <strong style="color:var(--text)">${s.label}</strong>
+      <span style="color:var(--t3);font-size:11px"> · ${s.sub}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:${s.w}px;height:20px;border-radius:5px;background:${s.bg};flex-shrink:0"></div>
+      <span style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap">${s.meses}</span>
+    </div>
+  </div>`).join('')}</div>
+  <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--bdr);font-size:11px;color:var(--t3);line-height:1.5">
+    Escala proporcional al tiempo estimado de comercialización. Base: absorción media de la zona Q4 2024–Q1 2025.
+  </div>
+  </div>${dlRow(csv,'escenarios_comercializacion')}</div>`;}
 function cQ4(){
   const csv=[['Promoción','Activos','Absorción','Señal'],['Torres del Parque','3','18 días','casi vendidas'],['Creu Alta','2','24 días','estable'],['Granados','1','31 días','estable'],['Pau Casals','0','—','dificultad']];
   return`<div class="cbox-wrap"><div class="cbox" style="padding:10px 0 0"><div class="cttl" style="padding:0 12px 10px">Áticos 2h activos por promoción</div><table class="cct"><thead><tr><th>Promoción</th><th>Activos</th><th>Absorción</th><th>Señal IA</th></tr></thead><tbody>${[
@@ -1085,6 +1124,171 @@ function cQ5(){
     {l:'Ritmo mensual',g:'~3,2 uds/mes',r:'~0,6 uds/mes'},
     {l:'Señal IA',g:'✦ Líder',r:'⚠ En dificultad'},
   ].map(r=>`<tr><td>${r.l}</td><td class="cg">${r.g}</td><td class="cr">${r.r}</td></tr>`).join('')}</tbody></table></div>${dlRow(csv,'comparativa_torres_paucasals')}</div>`;}
+
+// ── SIGNAL CHARTS ───────────────────────────────────────
+function cSig1(){
+  const csv=[['Tipología','Cambio precio'],['Ático 3h · Torres del Parque','+6,2%'],['Ático 3h · Creu Alta','+4,1%'],['Ático 3h · Granados','+2,5%'],['Ático 2h · Torres del Parque','+3,1%'],['Planta 3h · zona','+0,8%']];
+  return`<div class="cbox-wrap"><div class="cbox" style="min-width:290px"><div class="cttl">Evolución de precio por tipología — Sabadell Q1 2025</div><div class="hb-row">${[
+    {l:'Ático 3h · Torres del Parque', v:'+6,2%', w:155, c:'f-gd', d:'↑ líder de subida'},
+    {l:'Ático 3h · Creu Alta',          v:'+4,1%', w:105, c:'f-gd', d:'↑ acompaña tendencia'},
+    {l:'Ático 3h · Granados',           v:'+2,5%', w:64,  c:'f-gm', d:'↑ precio estable-alcista'},
+    {l:'Ático 2h · Torres del Parque',  v:'+3,1%', w:80,  c:'f-gm', d:'↑ más demanda que oferta'},
+    {l:'Planta 3h · zona',              v:'+0,8%', w:24,  c:'f-bl', d:'→ neutral'},
+  ].map(b=>`<div class="hb-item">
+    <div class="hb-lbl">${b.l}</div>
+    <div class="hb-track">
+      <div class="hb-fill ${b.c}" style="width:${b.w}px;height:9px;border-radius:4px;flex-shrink:0"></div>
+      <span class="hb-val" style="font-size:12px;font-weight:700;color:var(--green)">${b.v}</span>
+      <span class="hb-d up" style="font-size:11px">${b.d}</span>
+    </div>
+  </div>`).join('')}</div></div>${dlRow(csv,'precio_aticos_3h')}</div>`;}
+
+function cSig2(){
+  const csv=[['Tipología','Cambio precio','Absorción','Días mercado'],['Bajo 1h','−5,1%','29%','+180'],['Bajo 2h','−2,5%','40%','200'],['Ático 2h','+3,1%','64%','18'],['Ático 3h','+6,2%','71%','18']];
+  return`<div class="cbox-wrap"><div class="cbox" style="padding:10px 0 0;min-width:290px"><div class="cttl" style="padding:0 12px 10px">Bajos vs. áticos — absorción y precio comparados</div><table class="cct"><thead><tr><th>Tipología</th><th>Precio</th><th>Absorción</th><th>Días mercado</th></tr></thead><tbody>
+    <tr><td>Bajo 1h</td><td><span class="dn">−5,1%</span></td><td><span class="ap-r">29%</span></td><td><span style="color:var(--red);font-weight:600">+180 días</span></td></tr>
+    <tr><td>Bajo 2h</td><td><span class="dn">−2,5%</span></td><td><span class="ap-r">40%</span></td><td><span style="color:var(--amber);font-weight:600">200 días</span></td></tr>
+    <tr><td>Ático 2h</td><td><span class="up">+3,1%</span></td><td><span class="ap-g">64%</span></td><td><span style="color:var(--green);font-weight:600">18 días</span></td></tr>
+    <tr><td>Ático 3h</td><td><span class="up">+6,2%</span></td><td><span class="ap-g">71%</span></td><td><span style="color:var(--green);font-weight:600">18 días</span></td></tr>
+  </tbody></table></div>${dlRow(csv,'bajos_vs_aticos')}</div>`;}
+
+function cSig3(){
+  const csv=[['Promoción','Uds activas','Absorción','€/m²'],['Torres del Parque','2','18 días','3.500'],['Creu Alta','2','24 días','3.400'],['Granados','1','31 días','3.200'],['Pau Casals','0','—','—']];
+  return`<div class="cbox-wrap"><div class="cbox" style="padding:10px 0 0;min-width:290px"><div class="cttl" style="padding:0 12px 10px">Áticos 2h — oferta activa en zona Sabadell</div><table class="cct"><thead><tr><th>Promoción</th><th>Uds activas</th><th>Absorción</th><th>€/m²</th></tr></thead><tbody>
+    <tr><td>Torres del Parque</td><td>2 uds</td><td><span class="up">18 días</span></td><td style="font-weight:600">3.500€</td></tr>
+    <tr><td>Creu Alta</td><td>2 uds</td><td><span class="up">24 días</span></td><td style="font-weight:600">3.400€</td></tr>
+    <tr><td>Granados</td><td>1 ud</td><td><span class="up">31 días</span></td><td style="font-weight:600">3.200€</td></tr>
+    <tr><td>Pau Casals</td><td style="color:var(--t3)">0 uds</td><td style="color:var(--t3)">—</td><td style="color:var(--t3)">—</td></tr>
+    <tr class="rtot"><td colspan="4">✦ Solo 5 uds activas en toda la zona · hueco de mercado real</td></tr>
+  </tbody></table></div>${dlRow(csv,'oportunidad_aticos_2h')}</div>`;}
+
+function cSig4(){
+  const csv=[['Escenario','Mix','Meses'],['Sin bajos ni 4h','mix 2-3h','8–10'],['Con bajos','incluye bajos 1-2h','14–18'],['Con planta 4h','incluye 4h','22–28']];
+  return`<div class="cbox-wrap"><div class="cbox" style="min-width:290px"><div class="cttl">Impacto tipologías lentas en plazo de comercialización</div><div class="sc-rows">${[
+    {label:'Sin bajos ni 4h',sub:'mix áticos + plantas 2-3h',meses:'8–10 meses',w:72,bg:'#059669'},
+    {label:'Incluye bajos 1-2h',sub:'añade 15% bajos al mix',meses:'14–18 meses',w:129,bg:'#F59E0B'},
+    {label:'Incluye planta 4h',sub:'añade 4h al portfolio',meses:'22–28 meses',w:200,bg:'#EF4444'},
+  ].map(s=>`<div class="sc-item" style="margin-bottom:2px">
+    <div class="sc-lbl" style="font-size:12px;margin-bottom:5px"><strong style="color:var(--text)">${s.label}</strong><span style="color:var(--t3);font-size:11px"> · ${s.sub}</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:${s.w}px;height:20px;border-radius:5px;background:${s.bg};flex-shrink:0"></div>
+      <span style="font-size:13px;font-weight:700;color:var(--text);white-space:nowrap">${s.meses}</span>
+    </div>
+  </div>`).join('')}</div></div>${dlRow(csv,'impacto_tipologias')}</div>`;}
+
+function cSig5(){
+  const csv=[['Indicador','Pau Casals','Media zona'],['Ritmo ventas','0,6 uds/mes','2,8 uds/mes'],['Absorción','38%','64%'],['Movimiento precio','−2,8%','+3,2%'],['Días en mercado','91 días','28 días']];
+  return`<div class="cbox-wrap"><div class="cbox" style="padding:10px 0 0;min-width:290px"><div class="cttl" style="padding:0 12px 10px">Pau Casals vs. media zona — indicadores clave</div><table class="cmpt"><thead><tr><th></th><th class="cr">Pau Casals</th><th class="cg">Media zona</th></tr></thead><tbody>
+    <tr><td>Ritmo ventas</td><td class="cr">0,6 uds/mes</td><td class="cg">2,8 uds/mes</td></tr>
+    <tr><td>Absorción</td><td class="cr">38% en 5 meses</td><td class="cg">64% en 5 meses</td></tr>
+    <tr><td>Mov. precio</td><td class="cr">↓ −2,8%</td><td class="cg">↑ +3,2%</td></tr>
+    <tr><td>Días en mercado</td><td class="cr">91 días</td><td class="cg">28 días</td></tr>
+  </tbody></table></div>${dlRow(csv,'paucasals_diagnostico')}</div>`;}
+
+function cSig6(){
+  const csv=[['Tipología','Días absorción'],['Ático 3h','12'],['Ático 2h','18'],['Planta 3h','28'],['Planta 2h','34'],['Media zona','42']];
+  return`<div class="cbox-wrap"><div class="cbox" style="min-width:290px"><div class="cttl">Granados — absorción por tipología vs. media zona</div><div class="hb-row">${[
+    {l:'Granados · Ático 3h',  v:'12 días', w:155, c:'f-gd', d:'↑ mejor de zona'},
+    {l:'Granados · Ático 2h',  v:'18 días', w:120, c:'f-gd', d:'↑ muy rápido'},
+    {l:'Granados · Planta 3h', v:'28 días', w:80,  c:'f-gm', d:'→ ritmo sano'},
+    {l:'Granados · Planta 2h', v:'34 días', w:56,  c:'f-bl', d:'→ aceptable'},
+    {l:'Media zona',            v:'42 días', w:32,  c:'f-gy', d:'referencia'},
+  ].map(b=>`<div class="hb-item">
+    <div class="hb-lbl">${b.l}</div>
+    <div class="hb-track">
+      <div class="hb-fill ${b.c}" style="width:${b.w}px;height:9px;border-radius:4px;flex-shrink:0"></div>
+      <span class="hb-val" style="font-size:12px;font-weight:700">${b.v}</span>
+      <span class="hb-d ${b.l==='Media zona'?'fl':'up'}" style="font-size:11px">${b.d}</span>
+    </div>
+  </div>`).join('')}</div></div>${dlRow(csv,'granados_absorcion')}</div>`;}
+
+function cSig7(){
+  const csv=[['Tipología','Publicadas','Retiradas','Ritmo'],['Planta 2h','5','2','~1 ud/mes'],['Planta 3h','7','3','~1,2 uds/mes'],['Planta 4h','6','0','sin ventas']];
+  return`<div class="cbox-wrap"><div class="cbox" style="padding:10px 0 0;min-width:290px"><div class="cttl" style="padding:0 12px 10px">Central Park — absorción por tipología</div><table class="cct"><thead><tr><th>Tipología</th><th>Publicadas</th><th>Retiradas</th><th>Ritmo</th></tr></thead><tbody>
+    <tr><td>Planta 2h</td><td>5</td><td>2</td><td><span class="up">~1 ud/mes</span></td></tr>
+    <tr><td>Planta 3h</td><td>7</td><td>3</td><td><span class="up">~1,2 uds/mes</span></td></tr>
+    <tr><td style="color:var(--red);font-weight:600">Planta 4h</td><td>6</td><td style="color:var(--red);font-weight:700">0</td><td><span class="dn">sin ventas</span></td></tr>
+  </tbody></table>
+  <div style="padding:8px 12px;border-top:1px solid var(--bdr);font-size:11px;color:var(--red);font-weight:500">⚠ Los 4h suponen el 33% de las unidades y el 0% de las ventas</div>
+  </div>${dlRow(csv,'centralpark_tipologias')}</div>`;}
+
+// ── SIGNAL RESPONSE MAP ──────────────────────────────────
+const SIG_QS = {
+  'Áticos 3h suben +6,2%':{
+    intro:'La subida de +6,2% en áticos 3h no es un ajuste puntual — es la señal más clara del mercado de que la oferta está por debajo de la demanda real. Ningún promotor sube precio si no está vendiendo y con velocidad suficiente para permitírselo.<br><br>Lo que hay detrás de este dato:<br>• Torres del Parque ha subido precio <strong>dos veces en 4 meses</strong> en áticos 3h. Cada subida fue seguida de nuevas retiradas — el mercado aguanta sin resistencia.<br>• La demanda de áticos 3h en Sabadell viene de dos perfiles: <strong>comprador de mejora</strong> (familia que da el salto a más espacio) y <strong>segunda residencia próxima a Barcelona</strong>. Ambos tienen presupuesto flexible y baja sensibilidad al precio.<br>• El stock es crítico: solo <strong>8 unidades activas</strong> en toda la zona. Con absorción de 18 días, en menos de 5 meses el mercado queda vacío de oferta — y nadie tiene nada nuevo en obra.<br><br>Qué significa para ti: puedes <strong>salir por encima de 3.500€/m²</strong> en ático 3h sin riesgo de quedar fuera de mercado. La escasez trabaja a tu favor. El comprador que busca ático 3h en Sabadell hoy no tiene alternativa real.',
+    chart:cSig1,
+    concl:{type:'green',title:'Señal accionable para promotores',items:['Precio de salida recomendado: 3.500–3.800€/m²','Incluir al menos un 25% de áticos 3h en el mix','Ventana de oportunidad: 4–6 meses antes de nueva oferta en zona']},
+    nqs:[['¿A qué precio puedo salir con áticos?','q1'],['¿Qué tipología me recomiendas?','q2'],['¿Qué hueco no cubre nadie?','q4']]},
+  'Bajos 1h bajan −5,1%':{
+    intro:'Una bajada de −5,1% después de 3 meses sin ventas es exceso de oferta estructural, no coyuntural. El mercado ya ha votado: el bajo de 1 habitación no tiene demanda activa en Sabadell.<br><br>Por qué ocurre:<br>• El comprador de <strong>1 habitación en planta baja</strong> es el perfil más escaso: demasiado caro para inversor de alquiler (rentabilidad limitada) y poco atractivo para uso propio (sin luz, sin vistas, sin espacio).<br>• En Sabadell, el comprador de primera vivienda <strong>prefiere planta 2h aunque le cueste 80.000€ más</strong>. Los datos lo confirman: plantas 2h a 420.000€ se van en 34 días; bajos 1h a 295.000€ llevan 180 días sin moverse.<br>• Las bajadas de precio en bajos no reactivan ventas — solo destruyen margen. Torres del Parque ya lo ha comprobado: sus bajos son los únicos que no se mueven pese a haber bajado. <strong>El problema no es el precio, es el producto.</strong><br><br>Hay una excepción: bajos con jardín privado de más de 30m² y superficie útil superior a 75m² pueden encontrar comprador en el perfil mascota/terraza. Pero es un nicho muy pequeño.',
+    chart:cSig2,
+    concl:{type:'blue',title:'Recomendación de acción',items:['No incluir bajos 1h en proyectos nuevos','Si ya los tienes: acepta el plazo largo, no sigas bajando precio','Reconversión viable: bajo con jardín 75m²+ puede reactivarse']},
+    nqs:[['¿Qué tipología me recomiendas?','q2'],['¿Qué hueco no cubre nadie?','q4']]},
+  'Oportunidad detectada':{
+    intro:'Esta es la oportunidad más clara del mercado de Sabadell ahora mismo. Los áticos de 2 habitaciones tienen <strong>demanda probada y oferta casi agotada</strong> — la combinación perfecta para posicionar un proyecto nuevo.<br><br>Los datos que sostienen la oportunidad:<br>• <strong>Solo 5 unidades activas</strong> en toda la zona entre 4 promociones. Ninguna las trabaja como producto principal.<br>• Absorción de <strong>18–31 días</strong> de media — el producto más rápido del segmento por encima de 400.000€.<br>• Torres del Parque ya las tiene subidas de precio (+3,1%) y casi vendidas. En 2–3 meses no habrá stock en la zona.<br>• Precio actual: 3.200–3.500€/m². Con la escasez que viene, hay margen para salir a 3.500–3.600€/m² sin resistencia.<br><br>El perfil de comprador de ático 2h es <strong>pareja sin hijos o con hijo pequeño</strong>, presupuesto 420.000–500.000€, que busca terraza y altura. Es el segmento más activo en búsqueda en portales (+34% interanual en Sabadell para este rango según datos de demanda). Y no encuentra producto.',
+    chart:cSig3,
+    concl:{type:'green',title:'Ventana de oportunidad',items:['Áticos 2h: el hueco más accionable del mercado hoy','Precio objetivo: 3.400–3.600€/m² · margen al alza por escasez','En 3–4 meses el stock actual habrá desaparecido']},
+    nqs:[['¿Qué tipología me recomiendas?','q2'],['¿A qué precio puedo salir con áticos?','q1'],['¿Qué hueco no cubre nadie?','q4']]},
+  'Bajos y 4 habs no se venden':{
+    intro:'El problema no es solo que bajos y 4h vendan mal — es el <strong>efecto lastre que generan sobre toda la promoción</strong>. Mientras hay unidades bloqueadas, el ritmo general cae, los costes financieros se acumulan y el proyecto pierde atractivo para el banco.<br><br>La matemática es contundente:<br>• Un bajo 1h que tarda 200 días genera <strong>~8.000€ de coste financiero adicional</strong> por unidad (tipo 4,5% sobre capital pendiente). Con 10 bajos en portfolio, son 80.000€ de coste extra solo en financiación.<br>• En una promoción de 60 unidades con 10 bajos y 5 plantas de 4h, el plazo total se va de 10 meses a 22–28 meses. <strong>12–18 meses de financiación adicional sobre todo el proyecto.</strong><br>• Los bancos penalizan los proyectos con tipologías de baja absorción en el scoring de project finance. Un mix limpio (sin bajos ni 4h) puede mejorar condiciones: menor spread, mayor LTC y menor exigencia de preventas.<br><br>La regla práctica: cada tipología con absorción superior a 90 días añade riesgo sistémico al proyecto. No se trata de si se venderán — se trata de cuándo, y a qué coste.',
+    chart:cSig4,
+    concl:{type:'blue',title:'Impacto financiero real',items:['10 bajos + 5 plantas 4h = +14 meses de exposición acumulada','Coste financiero estimado adicional: 80.000–120.000€','Un mix limpio mejora condiciones de project finance']},
+    nqs:[['Si lanzo 60 uds, ¿cuánto tardo?','q3'],['¿Qué tipología me recomiendas?','q2']]},
+  'Señal de dificultad':{
+    intro:'La situación de Pau Casals es un caso de manual de <strong>desajuste entre producto y mercado</strong>. El error no fue de ejecución — fue estratégico: elegir el segmento premium en un mercado que no tiene la masa crítica de compradores para sostenerlo.<br><br>Diagnóstico:<br>• En Sabadell, el mercado de vivienda nueva por encima de 1.200.000€ tiene una demanda estimada de <strong>2–4 compradores al mes en toda la zona</strong>. Con 8 unidades publicadas, el plazo para liquidar al ritmo actual es de más de 2 años.<br>• La bajada de precio de hace 6 días es una señal de que el promotor ya lo sabe. Pero bajar precio en el segmento premium suele <strong>alejar más compradores de los que atrae</strong>: el comprador de 1,3M€ interpreta el descuento como señal de que algo falla en el producto.<br>• La diferencia con Torres del Parque (que sube precio y vende) es que Torres está en el <strong>segmento de demanda activa</strong> (295.000–640.000€). Metrovacesa se equivocó de mercado, no de ejecución.<br><br>Lección directa: en Sabadell, el techo del mercado con rotación real está alrededor de los <strong>650.000–700.000€</strong>. Por encima de eso, el plazo de venta se multiplica exponencialmente.',
+    chart:cSig5,
+    concl:{type:'blue',title:'Lección estratégica para Sabadell',items:['Techo del mercado activo: ~650.000–700.000€','Por encima de 1M€: demanda <4 compradores/mes · plazo +18 meses','Bajar precio en premium destruye percepción, no activa ventas']},
+    nqs:[['Compara Torres del Parque vs Pau Casals','q5'],['¿Qué hueco no cubre nadie?','q4']]},
+  'Buena absorción':{
+    intro:'Granados es el mejor termómetro del mercado medio de Sabadell. Su desempeño confirma que el segmento 385.000–520.000€ con producto bien calibrado <strong>tiene demanda real y sostenida</strong>.<br><br>Por qué Granados funciona bien:<br>• <strong>Mix acertado</strong>: 6 áticos (su producto más rápido, 12–18 días de absorción) y 12 plantas 2-3h. Sin bajos, sin 4h, sin formatos difíciles. La simplicidad es una estrategia.<br>• <strong>Precio ajustado</strong>: 3.100–3.250€/m², ligeramente por debajo de Torres del Parque. Le da velocidad sin sacrificar margen excesivo. Planta 2h a 380.000€ tiene demanda directa en Sabadell — es el precio de entrada al mercado de reposición.<br>• <strong>Eficiencia energética A</strong> (72 kWh/m²/año): el comprador lo filtra en portales. Es ventaja competitiva real en un mercado donde la mayoría de obra nueva está en B.<br>• <strong>Entrega en marzo 2027</strong>: plazo creíble sin solapamiento con otras entregas de zona, lo que reduce el riesgo de cancelaciones.<br><br>El único punto de atención: plantas 2h tienen leve tendencia bajista (−1,4%). No es crítico todavía, pero si bajan dos veces más habrá que ajustar.',
+    chart:cSig6,
+    concl:{type:'green',title:'Granados como referencia de mercado',items:['Benchmark del segmento medio: 3.100–3.250€/m²','Mix 33% áticos + 67% plantas 2-3h · sin tipologías problemáticas','Eficiencia energética A como ventaja competitiva diferencial']},
+    nqs:[['¿A qué precio puedo salir con áticos?','q1'],['¿Qué tipología me recomiendas?','q2'],['Compara Torres del Parque vs Pau Casals','q5']]},
+  'Ritmo moderado':{
+    intro:'Central Park tiene un problema muy localizado: <strong>los 6 pisos de 4 habitaciones están completamente bloqueados</strong>. El resto del portfolio (2h y 3h) tiene ritmo aceptable de 1–1,2 uds/mes. El problema es que los 4h representan el 33% de las unidades y el 0% de las ventas.<br><br>Por qué los 4h no se venden en Sabadell:<br>• El comprador de 4h en obra nueva necesita más de 500.000€ de presupuesto. En Sabadell, ese comprador <strong>prefiere unifamiliar adosado o chalet en zona norte</strong>: mismo precio, más espacio y jardín privado.<br>• En pisos de 4h, la superficie es ~110m². A 490.000€ el €/m² resulta ~4.450€/m² — muy por encima del mercado (3.300–3.800€/m²). El comprador lo percibe como caro por m² aunque el precio absoluto parezca razonable.<br>• A día de hoy hay <strong>6 plantas 4h sin una sola retirada</strong>. Al ritmo actual, tardarán más de 24 meses. El descuento necesario para activar ventas sería del −12 al −15%, destruyendo el margen de ese tramo.<br><br><strong>Opción recomendada</strong>: si la licencia lo permite, reconvertir 2–3 plantas 4h en dúplex 3h o en combinaciones 2h+2h (separando la vivienda) puede desbloquear el problema sin bajar precio en el resto del portfolio.',
+    chart:cSig7,
+    concl:{type:'blue',title:'Recomendación para Central Park',items:['Aislar el problema: 4h = 0% de ventas, 33% del stock','Estudiar reconversión a dúplex 3h o 2h+2h si licencia lo permite','No bajar precio: destruye margen sin garantía de activar demanda']},
+    nqs:[['¿Qué tipología me recomiendas?','q2'],['Si lanzo 60 uds, ¿cuánto tardo?','q3'],['Compara Torres del Parque vs Pau Casals','q5']]}
+};
+
+function askSig(sigText){
+  clearConv();
+  addUser(sigText);
+  showTyping(()=>{
+    let found=null;
+    for(const [key,val] of Object.entries(SIG_QS)){
+      if(sigText.includes(key)){found=val;break;}
+    }
+    if(!found){
+      const el=document.createElement('div'); el.className='msg-a';
+      el.innerHTML=`<div class="ai-txt">Analizando esta señal...<br><br>Profundiza con alguna de estas preguntas:</div>
+      <div class="nxt-sect">${Object.entries(QS).slice(0,3).map(([id,q])=>`<div class="nxt-q" onclick="ask('${id}')"><span class="nq-ic">✦</span>${q.q}</div>`).join('')}</div>`;
+      document.getElementById('msgs').appendChild(el); scrl();
+      return;
+    }
+    addAI(found);
+  });
+}
+
+function askDocSummary(){
+  clearConv();
+  addUser('Resumen con IA de los documentos');
+  showTyping(()=>{
+    const el=document.createElement('div'); el.className='msg-a';
+    el.innerHTML=`<div class="ai-txt">He analizado los 4 documentos de esta promoción. Esto es lo más relevante:</div>
+    <div class="doc-sum-wrap">
+      <div class="doc-sum-item"><div class="doc-sum-lbl"><span>📋</span>Memoria de calidades</div><div class="doc-sum-val">Acabados de nivel alto: parquet multicapa roble, carpintería exterior aluminio RPT, cocina equipada con electrodomésticos Bosch. Suelo radiante en zonas principales. Compatible con certificado energético A.</div></div>
+      <div class="doc-sum-item"><div class="doc-sum-lbl"><span>📐</span>Plano de distribución</div><div class="doc-sum-val">Planta tipo de 70–85m²: salón-cocina abierto de 28m², dormitorio principal con baño en suite, 2 dormitorios adicionales. Orientación sur-este. Todas las unidades con terraza mínima de 8m².</div></div>
+      <div class="doc-sum-item"><div class="doc-sum-lbl"><span>⚡</span>Certificado energético</div><div class="doc-sum-val">Clase A — 87 kWh/m²/año · 14 kg CO₂/m²/año. Uno de los mejores de la zona. Ventaja competitiva real: el comprador lo filtra en portales y valorará la menor factura energética como argumento de venta.</div></div>
+      <div class="doc-sum-item"><div class="doc-sum-lbl"><span>🏗️</span>Licencia de obra</div><div class="doc-sum-val">Concedida en febrero 2020. Sin incidencias registradas. Inicio de obra confirmado en la misma fecha. No hay riesgo de paralización legal visible en la documentación actual.</div></div>
+    </div>
+    <div class="nxt-sect"><div class="nxt-lbl">Siguiente paso</div>
+      <div class="nxt-q" onclick="ask('q1')"><span class="nq-ic">✦</span>¿A qué precio puedo salir con áticos?</div>
+      <div class="nxt-q" onclick="ask('q2')"><span class="nq-ic">✦</span>¿Qué tipología me recomiendas?</div>
+    </div>`;
+    document.getElementById('msgs').appendChild(el); scrl();
+  });
+}
 
 let cChips=[], cFmt=null;
 
@@ -1122,9 +1326,11 @@ function startReport(){
   cChips=[]; cFmt=null;
   const s1=document.createElement('div'); s1.id='rs1'; s1.className='msg-a';
   s1.innerHTML=`<div class="rep-txt">¿Qué quieres incluir en el informe?</div><div class="chips-row">
-    <div class="chip" onclick="tChip(this,'abs')"><span style="color:var(--purple);font-size:10px">✦</span> Análisis de absorción</div>
-    <div class="chip" onclick="tChip(this,'land')"><span style="color:var(--purple);font-size:10px">✦</span> Competitive landscape</div>
-    <div class="chip" onclick="tChip(this,'val')"><span style="color:var(--purple);font-size:10px">✦</span> Valuation model</div>
+    <div class="chip" onclick="tChip(this,'abs')">Análisis de absorción</div>
+    <div class="chip" onclick="tChip(this,'land')">Competitividad del mercado</div>
+    <div class="chip" onclick="tChip(this,'val')">Tipologías con mejor precio</div>
+    <div class="chip" onclick="tChip(this,'gap')">Huecos de mercado</div>
+    <div class="chip" onclick="tChip(this,'mix')">Mix tipológico recomendado</div>
   </div>`;
   document.getElementById('msgs').appendChild(s1); scrl();
 }
@@ -1136,9 +1342,9 @@ function tChip(el,id){
 function rStep2(){
   const s2=document.createElement('div'); s2.id='rs2'; s2.className='msg-a';
   s2.innerHTML=`<div class="rep-txt">¿En qué formato lo quieres?</div><div class="fmt-row">
-    <div class="fmtc" onclick="pFmt(this,'pdf')"><span class="fmt-ic">📄</span>PDF<span class="fmt-sub">Para presentar</span></div>
-    <div class="fmtc" onclick="pFmt(this,'ppt')"><span class="fmt-ic">📊</span>PPT<span class="fmt-sub">Para compartir</span></div>
-    <div class="fmtc" onclick="pFmt(this,'xlsx')"><span class="fmt-ic">📋</span>Excel<span class="fmt-sub">Para trabajar</span></div>
+    <div class="fmtc" onclick="pFmt(this,'pdf')"><span class="fmt-ic ms-ic" style="font-size:22px">picture_as_pdf</span>PDF<span class="fmt-sub">Para presentar</span></div>
+    <div class="fmtc" onclick="pFmt(this,'ppt')"><span class="fmt-ic ms-ic" style="font-size:22px">slideshow</span>PPT<span class="fmt-sub">Para compartir</span></div>
+    <div class="fmtc" onclick="pFmt(this,'xlsx')"><span class="fmt-ic ms-ic" style="font-size:22px">table_chart</span>Excel<span class="fmt-sub">Para trabajar</span></div>
   </div>`;
   document.getElementById('msgs').appendChild(s2); scrl();
 }
@@ -1156,13 +1362,19 @@ function rStep3(){
   document.getElementById('msgs').appendChild(s3); scrl();
 }
 function genReport(){
-  const icons={pdf:'📄',ppt:'📊',xlsx:'📋'}, lbls={pdf:'PDF',ppt:'PPT',xlsx:'Excel'}, f=cFmt||'pdf';
+  const icons={pdf:'📄',ppt:'📊',xlsx:'📋'}, lbls={pdf:'PDF · lista para presentar',ppt:'PPT · lista para compartir',xlsx:'Excel · lista para trabajar'}, f=cFmt||'pdf';
+  const chipMap={abs:'Análisis de absorción',land:'Competitividad del mercado',val:'Tipologías con mejor precio',gap:'Huecos de mercado',mix:'Mix tipológico recomendado'};
+  const chipLabels=cChips.map(c=>chipMap[c]||c);
+  const now=new Date(); const dateStr=now.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const repName=`Sabadell Q1 2025 · ${chipLabels[0]||'Competitive landscape'}`;
+  REP_LIST.push({ico:'description',name:repName,sub:`Generado el ${dateStr} · ${f.toUpperCase()}`,fmt:f});
+  renderRepList();
   showTyping(()=>{
     const el=document.createElement('div'); el.className='msg-a';
-    el.innerHTML=`<div class="ai-txt">Informe listo.</div><div class="dl-card">
+    el.innerHTML=`<div class="ai-txt">Informe listo. Lo encontrarás también en el tab <strong>Reportes</strong>.</div><div class="dl-card">
       <span class="dl-ic">${icons[f]}</span>
-      <div class="dl-info"><div class="dl-name">Sabadell Q1 2025 · Competitive landscape.${f}</div><div class="dl-sub">Generado ahora · ${lbls[f]}</div></div>
-      <button class="btn-dl" onclick="this.textContent='✓ Listo'">↓ Descargar</button>
+      <div class="dl-info"><div class="dl-name">${repName}.${f}</div><div class="dl-sub">Generado ahora · ${lbls[f]}</div></div>
+      <button class="btn-dl" onclick="this.innerHTML='<span class=ms-ic sm>check</span> Listo'">↓ Descargar</button>
     </div>`;
     document.getElementById('msgs').appendChild(el); scrl();
   });
@@ -1180,7 +1392,39 @@ function sendMsg(){
 }
 function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 
+// ── REPORTS ─────────────────────────────────────────────
+const REP_LIST = [
+  {ico:'description',name:'Análisis competitivo Sabadell Q4 2024',sub:'Generado el 15/01/2025 · PDF · 8 páginas',fmt:'pdf'},
+  {ico:'description',name:'Mix tipológico — Torres del Parque',sub:'Generado el 03/02/2025 · PPT · 12 diapositivas',fmt:'ppt'},
+];
+
+function renderRepList() {
+  const list = document.getElementById('rep-list');
+  const empty = document.getElementById('rep-empty');
+  const badge = document.getElementById('rep-badge');
+  if (REP_LIST.length === 0) {
+    empty.style.display = '';
+    list.innerHTML = '';
+    badge.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  badge.textContent = REP_LIST.length;
+  list.innerHTML = REP_LIST.slice().reverse().map(r=>`
+    <div class="rep-item">
+      <span class="rep-item-ico ms-ic md">description</span>
+      <div class="rep-item-body">
+        <div class="rep-item-name">${r.name}</div>
+        <div class="rep-item-meta">${r.sub}</div>
+      </div>
+      <button class="rep-item-dl" onclick="this.innerHTML='<span class=ms-ic sm>check</span> Listo'">
+        <span class="ms-ic sm">download</span> Descargar
+      </button>
+    </div>`).join('');
+}
+
 // Init
+renderRepList();
 switchTab('act');
 </script>
 </body>
