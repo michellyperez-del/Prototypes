@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lystos · Inteligencia de Promociones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple:#6741D9; --purple-lt:#EEE9FF; --blue:#3B5BDB;
+      --text:#0F172A; --t2:#334155; --t3:#64748B;
+      --bg:#F8FAFC; --sur:#FFFFFF; --bdr:#E2E8F0;
+      --shd:0 1px 2px rgba(0,0,0,.05);
+      --green:#16A34A; --gbg:#DCFCE7; --gdk:#15803D;
+      --amber:#D97706; --abg:#FFFBEB;
+      --red:#DC2626; --rbg:#FEF2F2;
+      --lys:#5C73FF; --lysbg:#EEF2FF; --lysbdr:#BECCFF; --lys-dark:#1738FA;
+      --th:52px;
+    }
+    body { font-family:'Inter',sans-serif; color:var(--text); background:var(--bg); }
+
+    /* TOPBAR */
+    .topbar { position:fixed; top:0; left:0; right:0; height:var(--th); background:var(--sur); border-bottom:1px solid var(--bdr); display:flex; align-items:center; padding:0 20px; z-index:100; gap:10px; }
+    .logo { font-size:17px; font-weight:700; letter-spacing:-.4px; margin-right:auto; }
+    .tbb { width:32px; height:32px; border-radius:50%; border:1px solid var(--bdr); background:var(--sur); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--t2); transition:background .15s; }
+    .tbb:hover { background:var(--bg); }
+    .tbb.ai { background:var(--purple); border-color:var(--purple); color:#fff; font-size:15px; }
+    .tbb.ai:hover { background:#5A35C0; }
+    .avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#3B5BDB,#6741D9); display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:600; cursor:pointer; }
+
+    /* LAYOUT */
+    .main { margin-top:var(--th); display:flex; height:calc(100vh - var(--th)); overflow:hidden; }
+    .left { flex:1; min-width:0; overflow-y:auto; background:var(--bg); display:flex; flex-direction:column; }
+
+    /* NAV HEADER */
+    .normal-hdr { background:var(--sur); border-bottom:1px solid var(--bdr); flex-shrink:0; }
+    .page-hdr { display:flex; align-items:center; gap:12px; padding:12px 24px; }
+    .page-title { font-size:24px; font-weight:700; color:var(--text); white-space:nowrap; flex-shrink:0; }
+    .nav-search { display:flex; align-items:center; gap:8px; height:40px; padding:0 12px; border:1px solid var(--bdr); border-radius:8px; background:var(--sur); flex:1; max-width:420px; min-width:0; cursor:text; }
+    .nav-sico { font-size:14px; color:var(--t3); flex-shrink:0; }
+    .nav-stxt { font-size:14px; font-weight:600; color:var(--text); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .nav-x { width:20px; height:20px; border-radius:50%; background:var(--bdr); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--t2); flex-shrink:0; cursor:pointer; }
+    .nav-btn { display:flex; align-items:center; gap:6px; height:40px; padding:0 12px; border:1px solid var(--bdr); border-radius:8px; background:var(--sur); font-size:14px; color:var(--text); cursor:pointer; white-space:nowrap; flex-shrink:0; font-family:'Inter',sans-serif; transition:background .15s; }
+    .nav-btn:hover { background:var(--bg); }
+    .nav-spacer { flex:1; }
+    .tabs-bar { display:flex; border-bottom:1px solid var(--bdr); background:var(--bg); }
+    .tab { padding:10px 20px; font-size:14px; font-weight:500; color:var(--t3); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .15s; white-space:nowrap; }
+    .tab.active { color:var(--text); border-bottom-color:var(--text); }
+
+    /* DETAIL HEADER */
+    .detail-hdr { display:none; padding:14px 24px; background:var(--sur); border-bottom:1px solid var(--bdr); align-items:center; gap:14px; flex-shrink:0; }
+    .detail-hdr.show { display:flex; }
+    .back-btn { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--t2); cursor:pointer; padding:6px 12px; border-radius:7px; border:1px solid var(--bdr); background:var(--sur); transition:background .15s; white-space:nowrap; font-family:'Inter',sans-serif; }
+    .back-btn:hover { background:var(--bg); }
+    .dth-thumb { width:36px; height:36px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+    .dth-info { flex:1; min-width:0; }
+    .dth-name { font-size:15px; font-weight:700; }
+    .dth-addr { font-size:12px; color:var(--t2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .dth-price { font-size:16px; font-weight:700; white-space:nowrap; }
+    .dth-lbl { font-size:10px; color:var(--t3); text-align:right; }
+
+    /* VIEWS */
+    .view { display:none; padding:20px 24px 40px; }
+    .view.show { display:block; }
+
+    /* KPI 3-col */
+    .kpi3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+    .kpi-card { background:var(--sur); border:1px solid var(--bdr); border-radius:11px; padding:16px 18px; box-shadow:var(--shd); }
+    .kpi-lbl { font-size:12px; color:var(--t3); margin-bottom:6px; }
+    .kpi-val { font-size:28px; font-weight:700; letter-spacing:-.5px; line-height:1; margin-bottom:4px; }
+    .kpi-delta { font-size:12px; color:var(--green); }
+
+    /* TABLE SECTION */
+    .tsec { background:var(--sur); border:1px solid var(--bdr); border-radius:11px; overflow:hidden; margin-bottom:14px; box-shadow:var(--shd); }
+    .tsec-hdr { padding:14px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--bdr); }
+    .tsec-title { font-size:16px; font-weight:600; color:var(--t2); }
+    .rt { width:100%; border-collapse:collapse; }
+    .rt th { text-align:left; padding:8px 16px; font-size:12px; font-weight:500; color:var(--t3); background:var(--bg); border-bottom:1px solid var(--bdr); white-space:nowrap; }
+    .rt td { padding:9px 16px; font-size:14px; color:var(--text); border-bottom:1px solid #F1F5F9; }
+    .rt tr:last-child td { border-bottom:none; }
+    .rt tr:hover td { background:#FAFAFA; cursor:pointer; }
+    .nb { width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; }
+    .nb-g { background:var(--green); } .nb-r { background:var(--red); }
+    .up{color:var(--green);font-weight:500;} .dn{color:var(--red);font-weight:500;} .fl{color:var(--t3);}
+    .df{color:var(--green);font-weight:600;} .ds{color:var(--red);font-weight:600;}
+    .ap-g{color:var(--green);font-weight:500;} .ap-r{color:var(--red);font-weight:500;}
+    /* name + mini bar */
+    .nm-bar { display:inline-flex; align-items:center; gap:8px; }
+    .mbar { height:4px; border-radius:2px; display:inline-block; flex-shrink:0; }
+    .mb-g{background:#16A34A;} .mb-r{background:#DC2626;}
+    /* change badge */
+    .chg-g { display:inline-flex; align-items:center; padding:3px 8px; border-radius:8px; background:var(--gbg); font-size:12px; font-weight:600; color:var(--green); white-space:nowrap; }
+    .chg-r { display:inline-flex; align-items:center; padding:3px 8px; border-radius:8px; background:var(--rbg); font-size:12px; font-weight:600; color:var(--red); white-space:nowrap; }
+
+    /* SIGNAL (Lystos blue) */
+    .sig { padding:8px 12px; display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:var(--lys); background:var(--lysbg); border-top:1px solid var(--lysbdr); line-height:1.4; }
+    .sig-t { flex:1; }
+    .sig-acts { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+    .sig-b { padding:4px 10px; border-radius:8px; border:1px solid var(--lys-dark); font-size:12px; font-weight:400; cursor:pointer; background:var(--sur); color:var(--lys-dark); white-space:nowrap; font-family:'Inter',sans-serif; }
+    .sig-arr { font-size:16px; color:var(--lys); }
+
+    /* PROMO CARDS */
+    .pcard { background:var(--sur); border:1px solid var(--bdr); border-radius:12px; overflow:hidden; margin-bottom:14px; box-shadow:var(--shd); }
+    .pcard-top { display:flex; border-bottom:1px solid var(--bdr); cursor:pointer; }
+
+    /* CAROUSEL */
+    .car { position:relative; width:213px; flex-shrink:0; height:160px; overflow:hidden; background:#1A1D2E; }
+    .car img { width:100%; height:100%; object-fit:cover; display:block; transition:opacity .3s; }
+    .car-ov { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(0,0,0,.05),rgba(0,0,0,.35)); pointer-events:none; }
+    .car-tag { position:absolute; top:8px; left:8px; background:rgba(30,41,59,0.64); color:#fff; font-size:14px; font-weight:400; padding:4px 8px; border-radius:4px; pointer-events:none; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+    .car-menu { position:absolute; top:8px; right:8px; width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.9); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.2); pointer-events:auto; }
+    .car-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:5px; }
+    .cdot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.5); cursor:pointer; transition:background .15s; }
+    .cdot.on { background:#fff; }
+    .car-arr { position:absolute; top:50%; transform:translateY(-50%); width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.85); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--text); box-shadow:0 1px 0 rgba(0,0,0,.15),0 0 4px rgba(0,0,0,.4); transition:background .15s; }
+    .car-arr:hover { background:#fff; }
+    .ca-l{left:8px;} .ca-r{right:8px;}
+
+    /* CARD BODY */
+    .pb { padding:12px 16px; flex:1; min-width:0; display:flex; flex-direction:column; justify-content:space-between; gap:10px; }
+    .pb-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+    .pb-meta { flex:1; min-width:0; display:flex; flex-direction:column; gap:5px; }
+    .pb-name { font-size:16px; font-weight:700; color:var(--text); line-height:1.3; }
+    .pb-arrow { font-size:16px; color:var(--t3); flex-shrink:0; margin-top:3px; }
+    .pb-info { display:flex; flex-wrap:wrap; gap:4px 20px; }
+    .pb-inf { display:flex; align-items:center; gap:4px; font-size:13px; color:var(--t2); }
+    .pb-price-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px; }
+    .pb-desde { display:flex; align-items:baseline; gap:5px; }
+    .pb-dlbl { font-size:12px; color:var(--t3); }
+    .pb-price { font-size:18px; font-weight:700; color:var(--text); }
+    .pb-types { font-size:13px; color:var(--t2); text-align:right; }
+
+    /* PROMO SIGNAL */
+    .psig { padding:8px 12px; display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; line-height:1.4; border-top:none; }
+    .psig.pos { color:var(--lys); background:var(--lysbg); }
+    .psig.neg { color:var(--red); background:var(--rbg); }
+    .psig.amb { color:#92400E; background:var(--abg); }
+    .psig-t { flex:1; }
+    .psig-acts { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+    .psig-b { padding:4px 10px; border-radius:8px; border:1px solid var(--lys-dark); font-size:12px; font-weight:400; cursor:pointer; background:var(--sur); color:var(--lys-dark); white-space:nowrap; font-family:'Inter',sans-serif; }
+    .psig.neg .psig-b { border-color:var(--red); color:var(--red); }
+    .psig.amb .psig-b { border-color:#92400E; color:#92400E; }
+    .psig-arr { font-size:16px; }
+    .psig.pos .psig-arr { color:var(--lys); }
+    .psig.neg .psig-arr { color:var(--red); }
+    .psig.amb .psig-arr { color:#92400E; }
+
+    /* PROMO TABLE */
+    .pt { width:100%; border-collapse:collapse; }
+    .pt th { text-align:left; padding:8px 16px; font-size:12px; font-weight:600; color:var(--t2); background:var(--sur); border-top:1px solid var(--bdr); border-bottom:1px solid var(--bdr); white-space:nowrap; }
+    .pt td { padding:8px 16px; font-size:14px; color:var(--text); border-bottom:1px solid var(--bdr); vertical-align:middle; }
+    .pt tr:last-child td { border-bottom:none; }
+    .pt .cr td { font-weight:500; }
+    .pt .sr { display:none; } .pt .sr.open { display:table-row; }
+    .pt .sr td { color:var(--t2); padding-left:48px; font-size:13px; background:#F8FAFC; font-weight:400; }
+    .tog { cursor:pointer; font-size:12px; color:var(--t3); margin-right:4px; display:inline-block; user-select:none; transition:transform .2s; }
+    .tog.open { transform:rotate(90deg); }
+    .tip-ic { font-size:13px; margin-right:5px; color:var(--t3); }
+    .trend-u { display:inline-flex; align-items:center; gap:3px; color:var(--green); font-size:13px; }
+    .trend-d { display:inline-flex; align-items:center; gap:3px; color:var(--red); font-size:13px; }
+
+    /* DETAIL KPI 4-col */
+    .kpi4 { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+    .kpi4c { background:var(--sur); border:1px solid var(--bdr); border-radius:10px; padding:14px 16px; box-shadow:var(--shd); }
+    .k4l { font-size:11px; color:var(--t3); margin-bottom:4px; display:flex; align-items:center; gap:4px; }
+    .k4v { font-size:22px; font-weight:700; letter-spacing:-.3px; line-height:1; }
+    .k4u { font-size:11px; color:var(--t2); margin-top:2px; }
+
+    /* DETAIL SIGNAL */
+    .dsig { background:var(--lysbg); border:1px solid var(--lysbdr); border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:12px; color:var(--lys); font-weight:600; line-height:1.5; display:flex; gap:8px; }
+    .dsig-icon { flex-shrink:0; font-size:14px; margin-top:1px; }
+
+    /* DETAIL GRID */
+    .dgrid { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--bdr); border-radius:10px; overflow:hidden; background:var(--sur); box-shadow:var(--shd); margin-bottom:16px; }
+    .dc { padding:12px 16px; border-right:1px solid var(--bdr); border-bottom:1px solid var(--bdr); }
+    .dc:nth-child(3n){border-right:none;} .dc:nth-last-child(-n+3){border-bottom:none;}
+    .dc-lbl { font-size:10px; color:var(--t3); margin-bottom:3px; display:flex; align-items:center; gap:4px; }
+    .dc-val { font-size:13px; font-weight:500; }
+    .ebadge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:500; padding:2px 8px; border-radius:4px; }
+    .eb-g{background:var(--gbg);color:var(--gdk);} .eb-r{background:var(--rbg);color:var(--red);}
+
+    /* SECTION BLOCK */
+    .sblk { background:var(--sur); border:1px solid var(--bdr); border-radius:10px; padding:16px; margin-bottom:14px; box-shadow:var(--shd); }
+    .sblk-title { font-size:13px; font-weight:600; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
+    .desc-txt { font-size:13px; color:var(--t2); line-height:1.65; }
+    .see-more { font-size:12px; color:var(--blue); cursor:pointer; margin-top:6px; }
+    .pills { display:flex; flex-wrap:wrap; gap:6px; }
+    .pill { padding:5px 12px; border-radius:20px; border:1px solid var(--bdr); background:var(--bg); font-size:12px; color:var(--t2); }
+
+    /* UNITS TABLE */
+    .ut { width:100%; border-collapse:collapse; }
+    .ut th { text-align:left; padding:8px 12px; font-size:11px; font-weight:500; color:var(--t3); background:var(--bg); border-bottom:1px solid var(--bdr); white-space:nowrap; }
+    .ut td { padding:7px 12px; font-size:12px; color:var(--text); border-bottom:1px solid var(--bdr); vertical-align:middle; }
+    .ut tr:last-child td { border-bottom:none; }
+    .ut tr:hover td { background:#FAFAFA; }
+    .uth { width:36px; height:36px; border-radius:6px; object-fit:cover; display:block; }
+    .un { font-size:12px; font-weight:500; } .ua { font-size:10.5px; color:var(--t3); }
+    .sbadge { display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:500; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+    .sb-a{background:var(--gbg);color:var(--gdk);} .sb-r{background:#FFF7ED;color:#C2410C;}
+
+    /* TIMELINE (Gantt style) */
+    .tl2-wrap { overflow-x:auto; }
+    .tl2 { border-collapse:collapse; width:100%; min-width:640px; }
+    .tl2 th { padding:8px 12px; font-size:12px; font-weight:500; color:var(--t2); text-align:left; border-bottom:1px solid var(--bdr); white-space:nowrap; background:var(--sur); }
+    .tl2 th.tl-month { text-align:center; width:72px; }
+    .tl2 td { padding:0 12px; border-bottom:1px solid #F1F5F9; vertical-align:middle; height:36px; font-size:12px; }
+    .tl2 td.tl-name { color:var(--t2); font-size:12px; white-space:nowrap; padding-left:52px; }
+    .tl2 td.tl-month-cell { text-align:center; position:relative; padding:0; }
+    .tl2 tr.tl-grp td { background:var(--bg); height:40px; padding:0 12px; }
+    .tl2 tr.tl-grp td.tl-grp-cell { font-size:14px; font-weight:600; color:var(--t2); }
+    .tl2 tr.tl-sub td { background:#F8FAFC; height:36px; }
+    .tl2 tr.tl-sub td.tl-name { padding-left:56px; font-size:12px; }
+    .tl2 tr:last-child td { border-bottom:none; }
+    .tl2-grp-inner { display:flex; align-items:center; gap:8px; }
+    .tl2-chevron { cursor:pointer; font-size:12px; color:var(--t3); user-select:none; }
+    .tl2-cnt { display:inline-flex; align-items:center; padding:1px 8px; border-radius:100px; background:#F8FAFC; font-size:12px; color:var(--t3); }
+    /* Gantt event dots */
+    .tl-cell-inner { position:relative; height:36px; }
+    .tl-bar { position:absolute; top:50%; transform:translateY(-50%); height:2px; background:var(--bdr); left:0; right:0; }
+    .tl-bar.dashed { background:transparent; border-top:2px dashed #CBD5E1; }
+    .tl-dot { position:absolute; top:50%; transform:translate(-50%,-50%); width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; border:1.5px solid; z-index:1; }
+    .tl-dot.pub { background:#22C55E; border-color:#22C55E; color:#fff; }
+    .tl-dot.up  { background:#FACC15; border-color:#FACC15; color:#fff; }
+    .tl-dot.dn  { background:#F87171; border-color:#F87171; color:#fff; }
+    .tl-dot.rm  { background:#F1F5F9; border-color:#CBD5E1; color:var(--t3); }
+
+    /* DOCS */
+    .doc-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .ai-sum-btn { display:flex; align-items:center; gap:5px; font-size:12px; font-weight:500; color:var(--purple); cursor:pointer; padding:5px 10px; border-radius:7px; border:1px solid var(--purple-lt); background:var(--purple-lt); font-family:'Inter',sans-serif; }
+    .doc-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--bdr); }
+    .doc-row:last-child { border-bottom:none; }
+    .doc-ico { font-size:16px; flex-shrink:0; } .doc-name { flex:1; font-size:13px; } .doc-date { font-size:11px; color:var(--t3); } .doc-dl { color:var(--blue); cursor:pointer; font-size:15px; }
+
+    /* ═══════════════════════ CHAT ═══════════════════════ */
+    .chat { flex:1; min-width:0; background:var(--sur); border-left:1px solid var(--bdr); display:flex; flex-direction:column; overflow:hidden; }
+    .chat-top { padding:13px 16px; border-bottom:1px solid var(--bdr); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .ct-icon { font-size:16px; color:var(--t2); cursor:pointer; }
+    .chat-msgs { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+    .msg-u { display:flex; justify-content:flex-end; }
+    .bub-u { background:var(--bg); border:1px solid var(--bdr); border-radius:10px 10px 2px 10px; padding:9px 13px; font-size:14px; color:var(--t2); max-width:300px; line-height:1.5; }
+    .msg-a { display:flex; flex-direction:column; gap:10px; align-items:flex-start; }
+    .ai-txt { font-size:16px; color:var(--text); line-height:1.7; }
+    .ai-txt strong { font-weight:600; }
+
+    /* CHAT CHARTS */
+    .cbox { background:var(--bg); border:1px solid var(--bdr); border-radius:10px; padding:12px 12px 10px; width:auto; align-self:flex-start; }
+    .cbox-wrap { display:flex; flex-direction:column; gap:0; align-self:flex-start; }
+    .cbox-wrap .cbox { border-radius:10px 10px 0 0; border-bottom:none; }
+    .chart-dl-row { display:flex; background:var(--sur); border:1px solid var(--bdr); border-top:none; border-radius:0 0 10px 10px; overflow:hidden; }
+    .chart-dl-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:5px; padding:6px 10px; font-size:11px; font-weight:500; color:var(--t3); cursor:pointer; font-family:'Inter',sans-serif; background:transparent; border:none; border-right:1px solid var(--bdr); transition:background .15s; }
+    .chart-dl-btn:last-child { border-right:none; }
+    .chart-dl-btn:hover { background:var(--bg); color:var(--t2); }
+    .cttl { font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.07em; margin-bottom:11px; }
+    .hb-row{display:flex;flex-direction:column;gap:8px;} .hb-item{display:flex;flex-direction:column;gap:3px;}
+    .hb-lbl{font-size:11px;color:var(--t2);} .hb-track{display:flex;align-items:center;gap:7px;}
+    .hb-fill{height:7px;border-radius:3.5px;flex-shrink:0;} .hb-val{font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;}
+    .hb-d{font-size:10px;font-weight:500;} .hb-d.up{color:var(--green);} .hb-d.fl{color:var(--t3);}
+    .f-gd{background:#059669;} .f-gm{background:#34D399;} .f-bl{background:#93C5FD;} .f-gy{background:#D1D5DB;}
+    .sc-rows{display:flex;flex-direction:column;gap:9px;} .sc-item{display:flex;flex-direction:column;gap:3px;}
+    .sc-lbl{font-size:11px;color:var(--t2);line-height:1.3;}
+    .sc-bar{height:20px;border-radius:4px;display:flex;align-items:center;padding:0 8px;min-width:70px;}
+    .sc-bar span{font-size:10px;font-weight:600;color:#fff;white-space:nowrap;}
+    .cct{width:100%;border-collapse:collapse;} .cct th{text-align:left;padding:5px 8px;font-size:10px;font-weight:600;color:var(--t3);background:#F9FAFB;border-bottom:1px solid var(--bdr);text-transform:uppercase;letter-spacing:.04em;}
+    .cct td{padding:6px 8px;border-bottom:1px solid var(--bdr);font-size:12px;color:var(--text);}
+    .cct tr:last-child td{border-bottom:none;} .cct .rtot td{background:var(--gbg);color:var(--gdk);font-weight:600;}
+    .cmpt{width:100%;border-collapse:collapse;} .cmpt th{padding:6px 8px;font-size:10px;font-weight:600;text-align:center;border-bottom:1px solid var(--bdr);}
+    .cmpt th:first-child{text-align:left;color:var(--t3);font-weight:400;}
+    .cmpt th.cg{background:var(--gbg);color:var(--gdk);} .cmpt th.cr{background:var(--rbg);color:var(--red);}
+    .cmpt td{padding:6px 8px;border-bottom:1px solid var(--bdr);font-size:12px;}
+    .cmpt td:first-child{color:var(--t2);} .cmpt td.cg{background:#F0FDF4;text-align:center;font-weight:500;color:var(--gdk);} .cmpt td.cr{background:#FFF5F5;text-align:center;font-weight:500;color:var(--red);}
+    .vb-area{display:flex;align-items:flex-end;gap:8px;justify-content:flex-start;margin-bottom:6px;width:220px;}
+    .vb-col{display:flex;flex-direction:column;align-items:center;gap:3px;width:60px;flex-shrink:0;}
+    .vb-pct{font-size:12px;font-weight:700;color:var(--text);} .vb-bar{width:100%;border-radius:4px 4px 0 0;}
+    .vb-lbl{font-size:11px;color:var(--t2);text-align:center;line-height:1.3;} .vb-days{font-size:10px;color:var(--t3);}
+
+    /* CHAT CARDS */
+    .concl{border-radius:9px;padding:11px 13px;width:100%;} .concl.green{background:var(--gbg);border:1px solid #A7F3D0;} .concl.blue{background:var(--lysbg);border:1px solid var(--lysbdr);}
+    .concl-ttl{font-size:14px;font-weight:600;margin-bottom:5px;}
+    .concl.green .concl-ttl{color:var(--gdk);} .concl.blue .concl-ttl{color:var(--lys-dark);}
+    .concl-item{font-size:14px;line-height:1.6;}
+    .concl.green .concl-item{color:#065F46;} .concl.blue .concl-item{color:var(--lys-dark);}
+    .warn{background:var(--abg);border:1px solid #FDE68A;border-radius:8px;padding:8px 10px;font-size:13px;color:#92400E;line-height:1.5;display:flex;gap:5px;width:100%;}
+    .w-ic{flex-shrink:0;margin-top:1px;}
+    /* suggested questions — hug content */
+    .nxt-sect{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+    .nxt-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;}
+    .nxt-q{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);font-size:14px;color:var(--text);cursor:pointer;transition:all .15s;}
+    .nxt-q:hover{border-color:var(--purple);background:var(--purple-lt);color:var(--purple);}
+    .nq-ic{color:var(--purple);font-size:11px;flex-shrink:0;}
+    /* Report card button (Figma 2687-2557) */
+    .rpt-card{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;border:1px solid var(--bdr);background:var(--sur);cursor:pointer;transition:background .15s,box-shadow .15s;box-shadow:var(--shd);width:100%;}
+    .rpt-card:hover{background:#FAFBFF;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+    .rpt-card-ico{font-size:22px;flex-shrink:0;}
+    .rpt-card-body{flex:1;min-width:0;text-align:left;}
+    .rpt-card-title{font-size:16px;font-weight:700;color:var(--t2);line-height:1.3;}
+    .rpt-card-sub{font-size:14px;color:#475569;margin-top:2px;}
+    .rpt-card-arr{font-size:18px;color:var(--t3);flex-shrink:0;}
+
+    /* REPORT FLOW */
+    .rep-txt{font-size:14px;color:var(--text);line-height:1.55;margin-bottom:4px;}
+    .chips-row{display:flex;flex-wrap:wrap;gap:5px;}
+    .chip{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:20px;border:1px solid var(--bdr);background:var(--sur);font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s;}
+    .chip:hover{border-color:var(--purple);background:var(--purple-lt);color:var(--purple);}
+    .chip.sel{border-color:var(--purple);background:var(--purple);color:#fff;}
+    .fmt-row{display:flex;gap:6px;}
+    .fmtc{flex:1;padding:10px 6px;border-radius:9px;border:1.5px solid var(--bdr);background:var(--bg);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--t2);transition:all .15s;}
+    .fmtc:hover,.fmtc.sel{border-color:var(--purple);background:var(--purple-lt);color:var(--purple);}
+    .fmt-ic{font-size:18px;} .fmt-sub{font-size:10px;color:var(--t3);}
+    .fmtc.sel .fmt-sub{color:#C4B5FD;}
+    .conf-row{display:flex;gap:6px;}
+    .btn-sec{flex:1;padding:8px;border-radius:8px;border:1px solid var(--bdr);background:var(--sur);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;transition:background .15s;}
+    .btn-sec:hover{background:var(--bg);}
+    .btn-pri{flex:1;padding:8px;border-radius:8px;border:none;background:var(--purple);color:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:background .15s;}
+    .btn-pri:hover{background:#5A35C0;}
+    .dl-card{background:var(--bg);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;display:flex;align-items:center;gap:10px;width:100%;}
+    .dl-ic{font-size:22px;flex-shrink:0;} .dl-info{flex:1;min-width:0;}
+    .dl-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .dl-sub{font-size:11px;color:var(--t2);}
+    .btn-dl{display:flex;align-items:center;gap:4px;padding:6px 11px;border-radius:7px;background:var(--blue);color:#fff;border:none;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;}
+    .btn-dl:hover{background:#2F4BC0;}
+
+    /* TYPING */
+    .typing{display:flex;gap:3px;align-items:center;padding:2px 0;}
+    .tdot{width:5px;height:5px;border-radius:50%;background:var(--t3);animation:bnc 1.2s infinite;}
+    .tdot:nth-child(2){animation-delay:.2s;} .tdot:nth-child(3){animation-delay:.4s;}
+    @keyframes bnc{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+    /* CHAT FOOTER */
+    .chat-foot{padding:11px 14px;border-top:1px solid var(--bdr);display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+    .ci-row{display:flex;gap:7px;align-items:center;}
+    .ci{flex:1;padding:9px 12px;border:1px solid var(--bdr);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:var(--bg);outline:none;resize:none;transition:border-color .15s;line-height:1.4;}
+    .ci:focus{border-color:var(--purple);} .ci::placeholder{color:var(--t3);}
+    .ci-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--bdr);background:var(--sur);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--t2);flex-shrink:0;}
+    .ci-send{width:30px;height:30px;border-radius:50%;border:none;background:var(--blue);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;flex-shrink:0;transition:background .15s;}
+    .ci-send:hover{background:#2F4BC0;}
+    .ci-note{font-size:11px;color:var(--t3);text-align:center;}
+
+    .hidden{display:none!important;}
+    ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
+
+    /* MATERIAL SYMBOLS */
+    .ms-ic { font-family:'Material Symbols Outlined'; font-weight:normal; font-style:normal; font-size:16px; line-height:1; display:inline-block; vertical-align:middle; letter-spacing:normal; text-transform:none; white-space:nowrap; direction:ltr; -webkit-font-smoothing:antialiased; color:inherit; }
+    .ms-ic.sm { font-size:13px; } .ms-ic.md { font-size:18px; } .ms-ic.lg { font-size:22px; }
+    .f-am{background:#F59E0B;} .f-rd{background:#EF4444;}
+    .d-ok{font-size:10px;font-weight:500;color:var(--green);} .d-wn{font-size:10px;font-weight:500;color:var(--amber);} .d-bd{font-size:10px;font-weight:500;color:var(--red);}
+
+    /* CHAT HISTORY DRAWER */
+    .chat { position:relative; }
+    .chat-hist-overlay { position:absolute; inset:0; background:rgba(0,0,0,.2); z-index:50; opacity:0; pointer-events:none; transition:opacity .2s; }
+    .chat-hist-overlay.open { opacity:1; pointer-events:auto; }
+    .chat-hist-drawer { position:absolute; top:0; left:0; bottom:0; width:270px; background:var(--sur); border-right:1px solid var(--bdr); box-shadow:4px 0 20px rgba(0,0,0,.1); z-index:51; transform:translateX(-100%); transition:transform .22s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; overflow:hidden; }
+    .chat-hist-drawer.open { transform:translateX(0); }
+    .hist-hdr { padding:13px 16px; border-bottom:1px solid var(--bdr); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .hist-hdr-ttl { font-size:14px; font-weight:600; color:var(--text); }
+    .hist-close { cursor:pointer; color:var(--t3); display:flex; align-items:center; transition:color .15s; }
+    .hist-close:hover { color:var(--text); }
+    .hist-list { flex:1; overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:2px; }
+    .hist-item { padding:9px 12px; border-radius:8px; cursor:pointer; transition:background .15s; }
+    .hist-item:hover { background:var(--bg); }
+    .hist-item.active { background:var(--purple-lt); }
+    .hist-item-t { font-size:13px; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hist-item-d { font-size:11px; color:var(--t3); margin-top:2px; }
+
+    /* REPORT TYPE CARDS */
+    .rtype-cards { display:flex; flex-direction:column; gap:7px; align-self:flex-start; width:100%; }
+    .rtype-card { display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:9px; border:1.5px solid var(--bdr); background:var(--sur); cursor:pointer; transition:all .15s; box-shadow:var(--shd); width:100%; }
+    .rtype-card:hover { border-color:var(--purple); background:var(--purple-lt); }
+    .rtype-card.sel { border-color:var(--purple); background:var(--purple-lt); }
+    .rtype-card.sel .rtype-card-title { color:var(--purple); }
+    .rtype-card-ico { color:var(--purple); flex-shrink:0; display:flex; }
+    .rtype-card-body { flex:1; min-width:0; text-align:left; }
+    .rtype-card-title { font-size:14px; font-weight:600; color:var(--t2); line-height:1.3; }
+    .rtype-card-sub { font-size:12px; color:var(--t3); margin-top:2px; }
+    .rtype-card-arr { color:var(--t3); display:flex; flex-shrink:0; }
+
+    /* REPORTS TAB */
+    .tab-badge { display:inline-flex; align-items:center; justify-content:center; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--blue); color:#fff; font-size:10px; font-weight:600; margin-left:4px; vertical-align:middle; }
+    .rep-list { display:flex; flex-direction:column; gap:10px; }
+    .rep-item { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; border:1px solid var(--bdr); background:var(--sur); box-shadow:var(--shd); cursor:pointer; transition:background .15s; }
+    .rep-item:hover { background:var(--bg); }
+    .rep-item-ico { color:var(--blue); display:flex; flex-shrink:0; }
+    .rep-item-body { flex:1; min-width:0; }
+    .rep-item-name { font-size:14px; font-weight:600; color:var(--text); }
+    .rep-item-meta { font-size:11px; color:var(--t3); margin-top:2px; }
+    .rep-item-dl { display:flex; align-items:center; gap:3px; padding:5px 10px; border-radius:6px; border:1px solid var(--bdr); background:var(--bg); font-family:'Inter',sans-serif; font-size:11px; font-weight:500; color:var(--t2); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:background .15s; }
+    .rep-item-dl:hover { background:var(--bdr); }
+
+    /* DOC SUMMARY */
+    .doc-sum-wrap { display:flex; flex-direction:column; gap:7px; width:100%; }
+    .doc-sum-item { background:var(--bg); border:1px solid var(--bdr); border-radius:8px; padding:10px 12px; }
+    .doc-sum-lbl { font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; letter-spacing:.06em; margin-bottom:5px; display:flex; align-items:center; gap:5px; }
+    .doc-sum-val { font-size:13px; color:var(--text); line-height:1.6; }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">Lystos</div>
+  <button class="tbb ai"><span class="ms-ic sm">auto_awesome</span></button>
+  <button class="tbb"><span class="ms-ic sm">home</span></button>
+  <button class="tbb"><span class="ms-ic sm">help</span></button>
+  <div class="avatar">JM</div>
+</header>
+
+<div class="main">
+  <!-- ══════════ LEFT ══════════ -->
+  <div class="left" id="leftPanel">
+
+    <!-- Normal header -->
+    <div class="normal-hdr" id="normalHdr">
+      <div class="page-hdr">
+        <div class="page-title">Promociones</div>
+        <div class="nav-search">
+          <span class="nav-sico"><span class="ms-ic sm">search</span></span>
+          <span class="nav-stxt">Sabadell</span>
+          <div class="nav-x">×</div>
+        </div>
+        <button class="nav-btn"><span class="ms-ic sm">tune</span> Filtros</button>
+        <div class="nav-spacer"></div>
+        <button class="nav-btn"><span class="ms-ic sm">calendar_today</span> Q1 2025</button>
+      </div>
+      <div class="tabs-bar">
+        <div class="tab" id="tab-res" onclick="switchTab('res')">Resumen</div>
+        <div class="tab active" id="tab-act" onclick="switchTab('act')">Promociones activas</div>
+        <div class="tab" id="tab-rep" onclick="switchTab('rep')">Reportes</div>
+      </div>
+    </div>
+
+    <!-- Detail header -->
+    <div class="detail-hdr" id="detailHdr">
+      <button class="back-btn" onclick="goBack()">← <span id="backLbl">Volver</span></button>
+      <img class="dth-thumb" id="dthThumb" src="" alt="" />
+      <div class="dth-info">
+        <div class="dth-name" id="dthName">—</div>
+        <div class="dth-addr" id="dthAddr">—</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="dth-lbl">Desde</div>
+        <div class="dth-price" id="dthPrice">—</div>
+      </div>
+    </div>
+
+    <!-- ── RESUMEN ── -->
+    <div class="view hidden" id="view-res">
+
+      <div class="kpi3">
+        <div class="kpi-card"><div class="kpi-lbl">Promociones activas</div><div class="kpi-val">100</div><div class="kpi-delta">↑ 15,2% vs año anterior</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Tasa de absorción</div><div class="kpi-val">87%</div><div class="kpi-delta">↑ 4,1% vs año anterior</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Tendencia de precios</div><div class="kpi-val">+20</div><div class="kpi-delta">↑ 15% vs año anterior</div></div>
+      </div>
+
+      <!-- Subidas -->
+      <div class="tsec">
+        <div class="tsec-hdr"><div class="tsec-title">Tipología con más subidas de precio</div><span style="color:var(--green);font-size:20px">↗</span></div>
+        <table class="rt">
+          <thead><tr><th>Tipología</th><th>Unidades</th><th>Precio medio</th><th>Cambio medio</th></tr></thead>
+          <tbody>
+            <tr><td><span class="nm-bar">Ático 3 habs<span class="mbar mb-g" style="width:62px"></span></span></td><td>18</td><td>500.000 €</td><td><span class="chg-g">+6,2%</span></td></tr>
+            <tr><td><span class="nm-bar">Piso 2 habs<span class="mbar mb-g" style="width:48px"></span></span></td><td>14</td><td>450.000 €</td><td><span class="chg-g">+4,8%</span></td></tr>
+            <tr><td><span class="nm-bar">Ático 2 habs<span class="mbar mb-g" style="width:48px"></span></span></td><td>11</td><td>450.000 €</td><td><span class="chg-g">+4,8%</span></td></tr>
+            <tr><td><span class="nm-bar">Piso 3 habs<span class="mbar mb-g" style="width:48px"></span></span></td><td>9</td><td>450.000 €</td><td><span class="chg-g">+4,8%</span></td></tr>
+            <tr><td><span class="nm-bar">Bajo 2 habs<span class="mbar mb-g" style="width:18px"></span></span></td><td>5</td><td>450.000 €</td><td><span class="chg-g">+1,8%</span></td></tr>
+          </tbody>
+        </table>
+        <div class="sig"><span class="ms-ic sm">auto_awesome</span><span class="sig-t">Áticos 3h suben +6,2% — la tipología con más presión alcista. Señal de demanda fuerte.</span><div class="sig-acts"><button class="sig-b" onclick="askSig('Áticos 3h suben +6,2% — la tipología con más presión alcista. Señal de demanda fuerte.')">Analizar</button><span class="sig-arr"><span class="ms-ic sm">arrow_forward</span></span></div></div>
+      </div>
+
+      <!-- Bajadas -->
+      <div class="tsec">
+        <div class="tsec-hdr"><div class="tsec-title">Tipología con más bajadas de precio</div><span style="color:var(--red);font-size:20px">↘</span></div>
+        <table class="rt">
+          <thead><tr><th>Tipología</th><th>Unidades</th><th>Precio medio</th><th>Cambio medio</th></tr></thead>
+          <tbody>
+            <tr><td><span class="nm-bar">Bajo 1 hab<span class="mbar mb-r" style="width:51px"></span></span></td><td>16</td><td>500.000 €</td><td><span class="chg-r">−5,1%</span></td></tr>
+            <tr><td><span class="nm-bar">Piso 1 hab<span class="mbar mb-r" style="width:38px"></span></span></td><td>13</td><td>450.000 €</td><td><span class="chg-r">−3,8%</span></td></tr>
+            <tr><td><span class="nm-bar">Bajo 2 habs<span class="mbar mb-r" style="width:25px"></span></span></td><td>9</td><td>450.000 €</td><td><span class="chg-r">−2,5%</span></td></tr>
+            <tr><td><span class="nm-bar">Dúplex 2 habs<span class="mbar mb-r" style="width:21px"></span></span></td><td>7</td><td>450.000 €</td><td><span class="chg-r">−2,1%</span></td></tr>
+            <tr><td><span class="nm-bar">Ático 1 hab<span class="mbar mb-r" style="width:15px"></span></span></td><td>4</td><td>450.000 €</td><td><span class="chg-r">−1,5%</span></td></tr>
+          </tbody>
+        </table>
+        <div class="sig"><span class="ms-ic sm" style="color:var(--red)">trending_down</span><span class="sig-t">Bajos 1h bajan −5,1% y llevan 3 meses sin venderse. Señal de exceso de oferta.</span><div class="sig-acts"><button class="sig-b" style="border-color:var(--red);color:var(--red)" onclick="askSig('Bajos 1h bajan −5,1% y llevan 3 meses sin venderse. Señal de exceso de oferta.')">Analizar</button><span class="sig-arr"><span class="ms-ic sm">arrow_forward</span></span></div></div>
+      </div>
+
+      <!-- Absorción rápida -->
+      <div class="tsec">
+        <div class="tsec-hdr"><div class="tsec-title">Tipología con absorción más rápida</div><span style="color:var(--green);font-size:20px">↗</span></div>
+        <table class="rt">
+          <thead><tr><th></th><th>Tipología</th><th>Publicadas</th><th>Retiradas</th><th>Precio medio</th><th>Absorción</th><th>Días en mercado</th></tr></thead>
+          <tbody>
+            <tr><td><span class="nb nb-g">1</span></td><td>Áticos · 2 habs</td><td>14</td><td>9</td><td>500.000 €</td><td><span class="ap-g">64%</span></td><td><span class="df">18 días</span></td></tr>
+            <tr><td><span class="nb nb-g">2</span></td><td>Planta · 2 habs</td><td>8</td><td>5</td><td>450.000 €</td><td><span class="ap-g">63%</span></td><td><span class="df">22 días</span></td></tr>
+            <tr><td><span class="nb nb-g">3</span></td><td>Planta · 3 habs</td><td>11</td><td>6</td><td>320.000 €</td><td><span class="ap-g">55%</span></td><td><span class="df">28 días</span></td></tr>
+          </tbody>
+        </table>
+        <div class="sig"><span class="ms-ic sm">auto_awesome</span><span class="sig-t"><strong>Oportunidad detectada:</strong> Áticos 2 habs tienen absorción de 18 días (64%) pero solo hay 3 unidades activas en toda la zona.</span><div class="sig-acts"><button class="sig-b" onclick="askSig('Oportunidad detectada: Áticos 2 habs tienen absorción de 18 días (64%) pero solo hay 3 unidades activas en toda la zona.')">Analizar</button><span class="sig-arr"><span class="ms-ic sm">arrow_forward</span></span></div></div>
+      </div>
+
+      <!-- Absorción lenta -->
+      <div class="tsec">
+        <div class="tsec-hdr"><div class="tsec-title">Tipología con absorción más lenta</div><span style="color:var(--red);font-size:20px">↘</span></div>
+        <table class="rt">
+          <thead><tr><th></th><th>Tipología</th><th>Publicadas</th><th>Retiradas</th><th>Precio medio</th><th>Absorción</th><th>Días en mercado</th></tr></thead>
+          <tbody>
+            <tr><td><span class="nb nb-r">1</span></td><td>Planta · 4 habs</td><td>22</td><td>7</td><td>500.000 €</td><td><span class="ap-r">32%</span></td><td><span class="ds">300 días</span></td></tr>
+            <tr><td><span class="nb nb-r">2</span></td><td>Bajo · 2 habs</td><td>10</td><td>4</td><td>450.000 €</td><td><span class="ap-r">40%</span></td><td><span class="ds">200 días</span></td></tr>
+            <tr><td><span class="nb nb-r">3</span></td><td>Bajo · 3 habs</td><td>4</td><td>2</td><td>320.000 €</td><td><span class="ap-r">50%</span></td><td><span class="ds">150 días</span></td></tr>
+          </tbody>
+        </table>
+        <div class="sig"><span class="ms-ic sm" style="color:var(--amber)">warning</span><span class="sig-t">Bajos y 4 habs no se venden. Si los incluyes en el mix, el plazo de comercialización se dispara.</span><div class="sig-acts"><button class="sig-b" style="border-color:#92400E;color:#92400E" onclick="askSig('Bajos y 4 habs no se venden. Si los incluyes en el mix, el plazo de comercialización se dispara.')">Analizar</button><span class="sig-arr"><span class="ms-ic sm">arrow_forward</span></span></div></div>
+      </div>
+    </div><!-- /resumen -->
+
+    <!-- ── ACTIVAS ── -->
+    <div class="view show" id="view-act">
+
+      <!-- Torres del Parque -->
+      <div class="pcard">
+        <div class="pcard-top" onclick="showDetail('tdp')">
+          <div class="car">
+            <img id="img-tdp" src="https://picsum.photos/seed/torres1/800/400" alt="Torres del Parque" />
+            <div class="car-ov"></div>
+            <div class="car-tag">Aedas Homes</div>
+            <button class="car-menu" onclick="ev(event)">···</button>
+            <div class="car-dots">
+              <div class="cdot on" onclick="ev(event);sl('tdp',0,this)"></div>
+              <div class="cdot" onclick="ev(event);sl('tdp',1,this)"></div>
+              <div class="cdot" onclick="ev(event);sl('tdp',2,this)"></div>
+            </div>
+            <button class="car-arr ca-l" onclick="ev(event);pv('tdp')">‹</button>
+            <button class="car-arr ca-r" onclick="ev(event);nx('tdp')">›</button>
+          </div>
+          <div class="pb">
+            <div class="pb-head">
+              <div class="pb-meta">
+                <div class="pb-name">Torres del Parque</div>
+                <div class="pb-info">
+                  <span class="pb-inf"><span class="ms-ic sm">location_on</span>Juan de Austria, 101, Sabadell</span>
+                  <span class="pb-inf"><span class="ms-ic sm">calendar_today</span>1ª pub.: 3/10/2025</span>
+                  <span class="pb-inf"><span class="ms-ic sm">construction</span>Entrega: 10/11/2026</span>
+                </div>
+              </div>
+              <span class="pb-arrow">→</span>
+            </div>
+            <div class="pb-price-row">
+              <div class="pb-desde"><span class="pb-dlbl">Desde</span><span class="pb-price">295.000 €</span></div>
+              <span class="pb-types">Pisos, áticos y dúplex de 3 y 4 habs</span>
+            </div>
+          </div>
+        </div>
+        <div class="psig pos"><span class="ms-ic sm">auto_awesome</span><span class="psig-t">Áticos 3h suben +6,2% — la tipología con más presión alcista. Señal de demanda fuerte.</span><div class="psig-acts"><button class="psig-b" onclick="askSig('Áticos 3h suben +6,2% — la tipología con más presión alcista. Señal de demanda fuerte.')">Analizar</button><span class="psig-arr"><span class="ms-ic sm">arrow_forward</span></span></div></div>
+        <table class="pt">
+          <thead><tr><th>Tipología</th><th>Total pub.</th><th>Activas</th><th>Retiradas</th><th>Subidas de precio</th><th>Bajadas de precio</th><th>Precio medio</th></tr></thead>
+          <tbody>
+            <tr class="cr"><td><span class="tog" onclick="tg('tdp-a',this)">▶</span><span class="tip-ic ms-ic sm">apartment</span>Áticos</td><td>8</td><td>5</td><td>3</td><td><span class="trend-u">↑ 4,8%</span></td><td><span class="trend-d">↓ 1,5%</span></td><td>590.000 €</td></tr>
+            <tr class="sr" data-g="tdp-a"><td><span class="ms-ic sm">bed</span>3 habs</td><td>2</td><td>2</td><td>0</td><td><span class="trend-u">↑ 3,8%</span></td><td>—</td><td>640.000 €</td></tr>
+            <tr class="sr" data-g="tdp-a"><td><span class="ms-ic sm">bed</span>2 habs</td><td>3</td><td>2</td><td>1</td><td><span class="trend-u">↑ 3,1%</span></td><td><span class="trend-d">↓ 2%</span></td><td>560.000 €</td></tr>
+            <tr class="sr" data-g="tdp-a"><td><span class="ms-ic sm">bed</span>1 hab</td><td>3</td><td>1</td><td>2</td><td><span class="trend-u">↑ 2,5%</span></td><td>—</td><td>490.000 €</td></tr>
+            <tr class="cr"><td><span class="tog" onclick="tg('tdp-p',this)">▶</span><span class="tip-ic ms-ic sm">home</span>Planta</td><td>8</td><td>5</td><td>3</td><td><span class="trend-u">↑ 3,3%</span></td><td><span class="trend-d">↓ 1,8%</span></td><td>450.000 €</td></tr>
+            <tr class="sr" data-g="tdp-p"><td><span class="ms-ic sm">bed</span>3 habs</td><td>4</td><td>3</td><td>1</td><td><span class="trend-u">↑ 3,5%</span></td><td>—</td><td>480.000 €</td></tr>
+            <tr class="sr" data-g="tdp-p"><td><span class="ms-ic sm">bed</span>2 habs</td><td>4</td><td>2</td><td>2</td><td><span class="trend-u">↑ 3,1%</span></td><td><span class="trend-d">↓ 1,8%</span></td><td>420.000 €</td></tr>
+            <tr class="cr"><td><span class="tog" onclick="tg('tdp-b',this)">▶</span><span class="tip-ic ms-ic sm">home</span>Bajos</td><td>8</td><td>5</td><td>3</td><td><span class="trend-u">↑ 2,1%</span></td><td><span class="trend-d">↓ 3,5%</span></td><td>295.000 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pau Casals -->
+      <div class="pcard">
+        <div class="pcard-top" onclick="showDetail('pc')">
+          <div class="car">
+            <img id="img-pc" src="https://picsum.photos/seed/paucasals1/800/400" alt="Pau Casals" />
+            <div class="car-ov"></div>
+            <div class="car-tag">Metrovacesa</div>
+            <button class="car-menu" onclick="ev(event)">···</button>
+            <div class="car-dots">
+              <div class="cdot on" onclick="ev(event);sl('pc',0,this)"></div>
+              <div class="cdot" onclick="ev(event);sl('pc',1,this)"></div>
+              <div class="cdot" onclick="ev(event);sl('pc',2,this)"></div>
+            </div>
+            <button class="car-arr ca-l" onclick="ev(event);pv('pc')">‹</button>
+            <button class="car-arr ca-r" onclick="ev(event);nx('pc')">›</button>
+          </div>
+          <div class="pb">
+            <div class="pb-head">
+              <div class="pb-meta">
+                <div class="pb-name">Pau Casals · Turó Park</div>
+                <div class="pb-info">
+                  <span class="pb-inf"><span class="ms-ic sm">location_on</span>Calle Canigo, 97, Sabadell</span>
+                  <span class="pb-inf"><span class="ms-ic sm">calendar_today</span>1ª pub.: 3/10/2025</span>
+                  <span class="pb-inf"><span class="ms-ic sm">construction</span>Entrega: 10/11/2026</span>
+                </div>
+              </div>
+              <span class="pb-arrow">→</span>
+            </div>
+            <div class="pb-price-row">
+              <div class="pb-desde"><span class="pb-dlbl">Desde</span><span class="pb-price">1.350.000 €</span></div>
+              <span class="pb-types">Pisos de 2 habs</span>
+            </div>
+          </div>
+        </div>
+        <div class="psig neg"><span class="ms-ic sm">warning</span><span class="psig-t">Señal de dificultad — solo 3 retiradas en 5 meses y bajó precio hace 6 días. Segmento +1,3M€ saturado.</span><div class="psig-acts"><button class="psig-b" onclick="askSig('Señal de dificultad — solo 3 retiradas en 5 meses y bajó precio hace 6 días. Segmento +1,3M€ saturado.')">Analizar</button><span class="psig-arr"><span class="ms-ic sm">arrow_forward</span></span></div></div>
+        <table class="pt">
+          <thead><tr><th>Tipología</th><th>Total pub.</th><th>Activas</th><th>Retiradas</th><th>Subidas de precio</th><th>Bajadas de precio</th><th>Precio medio</th></tr></thead>
+          <tbody>
+            <tr class="cr"><td><span class="tog" onclick="tg('pc-p',this)">▶</span><span class="tip-ic ms-ic sm">home</span>Planta</td><td>8</td><td>5</td><td>3</td><td><span class="trend-u">↑ 2,8%</span></td><td><span class="trend-d">↓ 2,8%</span></td><td>1.400.000 €</td></tr>
+            <tr class="sr" data-g="pc-p"><td><span class="ms-ic sm">bed</span>2 habs</td><td>8</td><td>5</td><td>3</td><td><span class="trend-u">↑ 2,8%</span></td><td><span class="trend-d">↓ 2,8%</span></td><td>1.400.000 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Granados -->
+      <div class="pcard">
+        <div class="pcard-top" onclick="showDetail('gran')">
+          <div class="car">
+            <img id="img-gran" src="https://picsum.photos/seed/granados1/800/400" alt="Granados" />
+            <div class="car-ov"></div>
+            <div class="car-tag">Kronos Homes</div>
+            <button class="car-menu" onclick="ev(event)">···</button>
+            <div class="car-dots">
+              <div class="cdot on" onclick="ev(event);sl('gran',0,this)"></div>
+              <div class="cdot" onclick="ev(event);sl('gran',1,this)"></div>
+              <div class="cdot" onclick="ev(event);sl('gran',2,this)"></div>
+            </div>
+            <button class="car-arr ca-l" onclick="ev(event);pv('gran')">‹</button>
+            <button class="car-arr ca-r" onclick="ev(event);nx('gran')">›</button>
+          </div>
+          <div class="pb">
+            <div class="pb-head">
+              <div class="pb-meta">
+                <div class="pb-name">Residencial Granados</div>
+                <div class="pb-info">
+                  <span class="pb-inf"><span class="ms-ic sm">location_on</span>Carrer de Granados, 45, Sabadell</span>
+                  <span class="pb-inf"><span class="ms-ic sm">calendar_today</span>1ª pub.: 15/08/2025</span>
+                  <span class="pb-inf"><span class="ms-ic sm">construction</span>Entrega: 03/2027</span>
+                </div>
+              </div>
+              <span class="pb-arrow">→</span>
+            </div>
+            <div class="pb-price-row">
+              <div class="pb-desde"><span class="pb-dlbl">Desde</span><span class="pb-price">385.000 €</span></div>
+              <span class="pb-types">Pisos y áticos de 2 y 3 habs</span>
+            </div>
+          </div>
+        </div>
+        <div class="psig pos"><span class="ms-ic sm">auto_awesome</span><span class="psig-t">Buena absorción — 8 retiradas en 4 meses. Precio estable con leve tendencia alcista en áticos.</span><div class="psig-acts"><button class="psig-b" onclick="askSig('Buena absorción — 8 retiradas en 4 meses. Precio estable con leve tendencia alcista en áticos.')">Analizar</button><span class="psig-arr"><span class="ms-ic sm">arrow_forward</span></span></div></div>
+        <table class="pt">
+          <thead><tr><th>Tipología</th><th>Total pub.</th><th>Activas</th><th>Retiradas</th><th>Subidas de precio</th><th>Bajadas de precio</th><th>Precio medio</th></tr></thead>
+          <tbody>
+            <tr class="cr"><td><span class="tog" onclick="tg('gran-a',this)">▶</span><span class="tip-ic ms-ic sm">apartment</span>Áticos</td><td>6</td><td>3</td><td>3</td><td><span class="trend-u">↑ 2,5%</span></td><td>—</td><td>520.000 €</td></tr>
+            <tr class="sr" data-g="gran-a"><td><span class="ms-ic sm">bed</span>3 habs</td><td>3</td><td>1</td><td>2</td><td><span class="trend-u">↑ 2,5%</span></td><td>—</td><td>560.000 €</td></tr>
+            <tr class="sr" data-g="gran-a"><td><span class="ms-ic sm">bed</span>2 habs</td><td>3</td><td>2</td><td>1</td><td><span class="trend-u">↑ 2,5%</span></td><td>—</td><td>480.000 €</td></tr>
+            <tr class="cr"><td><span class="tog" onclick="tg('gran-p',this)">▶</span><span class="tip-ic ms-ic sm">home</span>Planta</td><td>12</td><td>7</td><td>5</td><td>—</td><td><span class="trend-d">↓ 1,2%</span></td><td>410.000 €</td></tr>
+            <tr class="sr" data-g="gran-p"><td><span class="ms-ic sm">bed</span>3 habs</td><td>6</td><td>4</td><td>2</td><td>—</td><td><span class="trend-d">↓ 1,0%</span></td><td>440.000 €</td></tr>
+            <tr class="sr" data-g="gran-p"><td><span class="ms-ic sm">bed</span>2 habs</td><td>6</td><td>3</td><td>3</td><td>—</td><td><span class="trend-d">↓ 1,4%</span></td><td>380.000 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Central Park -->
+      <div class="pcard">
+        <div class="pcard-top" onclick="showDetail('cp')">
+          <div class="car">
+            <img id="img-cp" src="https://picsum.photos/seed/centralpark1/800/400" alt="Central Park" />
+            <div class="car-ov"></div>
+            <div class="car-tag">Via Célere</div>
+            <button class="car-menu" onclick="ev(event)">···</button>
+            <div class="car-dots">
+              <div class="cdot on" onclick="ev(event);sl('cp',0,this)"></div>
+              <div class="cdot" onclick="ev(event);sl('cp',1,this)"></div>
+              <div class="cdot" onclick="ev(event);sl('cp',2,this)"></div>
+            </div>
+            <button class="car-arr ca-l" onclick="ev(event);pv('cp')">‹</button>
+            <button class="car-arr ca-r" onclick="ev(event);nx('cp')">›</button>
+          </div>
+          <div class="pb">
+            <div class="pb-head">
+              <div class="pb-meta">
+                <div class="pb-name">Residencial Central Park</div>
+                <div class="pb-info">
+                  <span class="pb-inf"><span class="ms-ic sm">location_on</span>Avda. Central, 12, Sabadell</span>
+                  <span class="pb-inf"><span class="ms-ic sm">calendar_today</span>1ª pub.: 20/09/2025</span>
+                  <span class="pb-inf"><span class="ms-ic sm">construction</span>Entrega: 06/2027</span>
+                </div>
+              </div>
+              <span class="pb-arrow">→</span>
+            </div>
+            <div class="pb-price-row">
+              <div class="pb-desde"><span class="pb-dlbl">Desde</span><span class="pb-price">420.000 €</span></div>
+              <span class="pb-types">Pisos de 2, 3 y 4 habs</span>
+            </div>
+          </div>
+        </div>
+        <div class="psig amb"><span class="ms-ic sm">warning</span><span class="psig-t">Ritmo moderado — 5 retiradas en 4 meses. Los 4 habs tienen baja absorción. Revisar mix recomendado.</span><div class="psig-acts"><button class="psig-b" onclick="askSig('Ritmo moderado — 5 retiradas en 4 meses. Los 4 habs tienen baja absorción. Revisar mix recomendado.')">Analizar</button><span class="psig-arr"><span class="ms-ic sm">arrow_forward</span></span></div></div>
+        <table class="pt">
+          <thead><tr><th>Tipología</th><th>Total pub.</th><th>Activas</th><th>Retiradas</th><th>Subidas de precio</th><th>Bajadas de precio</th><th>Precio medio</th></tr></thead>
+          <tbody>
+            <tr class="cr"><td><span class="tog" onclick="tg('cp-p',this)">▶</span><span class="tip-ic ms-ic sm">home</span>Planta</td><td>18</td><td>13</td><td>5</td><td><span class="trend-u">↑ 1,5%</span></td><td><span class="trend-d">↓ 0,8%</span></td><td>450.000 €</td></tr>
+            <tr class="sr" data-g="cp-p"><td><span class="ms-ic sm">bed</span>4 habs</td><td>6</td><td>6</td><td>0</td><td>—</td><td><span class="trend-d">↓ 0,8%</span></td><td>490.000 €</td></tr>
+            <tr class="sr" data-g="cp-p"><td><span class="ms-ic sm">bed</span>3 habs</td><td>7</td><td>4</td><td>3</td><td><span class="trend-u">↑ 2,1%</span></td><td>—</td><td>455.000 €</td></tr>
+            <tr class="sr" data-g="cp-p"><td><span class="ms-ic sm">bed</span>2 habs</td><td>5</td><td>3</td><td>2</td><td><span class="trend-u">↑ 1,8%</span></td><td>—</td><td>415.000 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /activas -->
+
+    <!-- ── REPORTES ── -->
+    <div class="view hidden" id="view-rep">
+      <p id="rep-empty" style="text-align:center;padding:48px 20px;font-size:14px;color:var(--t3)">Aún no has generado ningún reporte.</p>
+      <div class="rep-list" id="rep-list"></div>
+    </div>
+
+    <!-- ── DETAIL ── -->
+    <div class="view hidden" id="view-det"></div>
+
+  </div><!-- /left -->
+
+  <!-- ══════════ CHAT ══════════ -->
+  <div class="chat">
+    <!-- History drawer -->
+    <div class="chat-hist-overlay" id="histOverlay" onclick="closeHist()"></div>
+    <div class="chat-hist-drawer" id="histDrawer">
+      <div class="hist-hdr">
+        <span class="hist-hdr-ttl">Historial</span>
+        <span class="hist-close" onclick="closeHist()"><span class="ms-ic md">close</span></span>
+      </div>
+      <div class="hist-list">
+        <div class="hist-item active"><div class="hist-item-t">Análisis Sabadell Q1 2025</div><div class="hist-item-d">Ahora</div></div>
+        <div class="hist-item"><div class="hist-item-t">Comparativa Torres vs Pau Casals</div><div class="hist-item-d">Hace 2 días</div></div>
+        <div class="hist-item"><div class="hist-item-t">Mix tipológico recomendado</div><div class="hist-item-d">Hace 5 días</div></div>
+        <div class="hist-item"><div class="hist-item-t">Precios de salida áticos 3h</div><div class="hist-item-d">Hace 1 semana</div></div>
+        <div class="hist-item"><div class="hist-item-t">Informe trimestral Q4 2024</div><div class="hist-item-d">Hace 2 semanas</div></div>
+        <div class="hist-item"><div class="hist-item-t">Gap de mercado Sabadell Norte</div><div class="hist-item-d">Hace 3 semanas</div></div>
+      </div>
+    </div>
+    <div class="chat-top">
+      <span class="ct-icon" onclick="openHist()" style="cursor:pointer"><span class="ms-ic md">menu</span></span>
+      <span class="ct-icon" style="cursor:pointer"><span class="ms-ic md">close</span></span>
+    </div>
+    <div class="chat-msgs" id="msgs">
+      <div class="msg-a" id="msg-init">
+        <div class="ai-txt">
+          He analizado las 4 promociones activas en Sabadell.<br><br>
+          • <strong>Torres del Parque lidera</strong>: sube precio en todas sus tipologías y tiene más retiradas que nadie.<br>
+          • <strong>Metrovacesa en dificultad</strong>: solo 3 retiradas en 5 meses y bajó precio hace 6 días.<br>
+          • <strong>Gap de mercado</strong>: ninguna promoción tiene áticos 2h como producto principal. Solo 3 uds activas en toda la zona.
+        </div>
+        <div class="nxt-sect" id="init-qs">
+          <div class="nxt-lbl">Continúa el análisis</div>
+          <div class="nxt-q" onclick="ask('q1')"><span class="nq-ic ms-ic sm">auto_awesome</span>¿A qué precio puedo salir con áticos?</div>
+          <div class="nxt-q" onclick="ask('q2')"><span class="nq-ic ms-ic sm">auto_awesome</span>¿Qué tipología me recomiendas?</div>
+          <div class="nxt-q" onclick="ask('q3')"><span class="nq-ic ms-ic sm">auto_awesome</span>Si lanzo 60 uds, ¿cuánto tardo?</div>
+          <div class="nxt-q" onclick="ask('q4')"><span class="nq-ic ms-ic sm">auto_awesome</span>¿Qué hueco no cubre nadie?</div>
+          <div class="nxt-q" onclick="ask('q5')"><span class="nq-ic ms-ic sm">auto_awesome</span>Compara Torres del Parque vs Pau Casals</div>
+        </div>
+      </div>
+    </div>
+    <div class="chat-foot">
+      <div class="ci-row">
+        <textarea class="ci" id="chatInp" rows="1" placeholder="Escribe un mensaje" onkeydown="onKey(event)"></textarea>
+        <button class="ci-btn"><span class="ms-ic sm">mic</span></button>
+        <button class="ci-send" onclick="sendMsg()"><span class="ms-ic sm">north</span></button>
+      </div>
+      <div class="ci-note">Puede cometer errores. Comprueba la información importante.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CAROUSEL ────────────────────────────────────────────
+const CAR_SEEDS = {
+  tdp:  ['torres1','torres2','torres3'],
+  pc:   ['paucasals1','paucasals2','paucasals3'],
+  gran: ['granados1','granados2','granados3'],
+  cp:   ['centralpark1','centralpark2','centralpark3']
+};
+const carIdx = {tdp:0, pc:0, gran:0, cp:0};
+
+function ev(e) { e.stopPropagation(); }
+
+function setCarImg(id) {
+  const seed = CAR_SEEDS[id][carIdx[id]];
+  document.getElementById('img-'+id).src = `https://picsum.photos/seed/${seed}/800/400`;
+  const car = document.getElementById('img-'+id).closest('.car');
+  car.querySelectorAll('.cdot').forEach((d,i)=>d.classList.toggle('on', i===carIdx[id]));
+}
+
+function nx(id) { carIdx[id] = (carIdx[id]+1) % 3; setCarImg(id); }
+function pv(id) { carIdx[id] = (carIdx[id]+2) % 3; setCarImg(id); }
+function sl(id,i) { carIdx[id]=i; setCarImg(id); }
+
+// ── ROW TOGGLE ──────────────────────────────────────────
+function tg(grp, el) {
+  el.classList.toggle('open');
+  document.querySelectorAll(`.sr[data-g="${grp}"]`).forEach(r=>r.classList.toggle('open'));
+}
+
+// ── TABS ────────────────────────────────────────────────
+let lastTab = 'act';
+function switchTab(t) {
+  lastTab = t;
+  ['res','act'].forEach(id=>{
+    document.getElementById('tab-'+id).classList.toggle('active', id===t);
+    document.getElementById('view-'+id).classList.toggle('show', id===t);
+    document.getElementById('view-'+id).classList.toggle('hidden', id!==t);
+  });
+  document.getElementById('view-det').classList.add('hidden');
+  document.getElementById('view-det').classList.remove('show');
+}
+
+// ── DETAIL ──────────────────────────────────────────────
+const PROMO_DATA = {
+  tdp: {
+    name:'Torres del Parque', developer:'Aedas Homes',
+    addr:'Juan de Austria, 101, El Parc i la Llacuna del Poblenou, Sabadell',
+    price:'295.000 €', seed:'torres1',
+    kpis:[{l:'Unidades publicadas',v:'24'},{l:'Unidades activas',v:'8'},{l:'Unidades retiradas',v:'16'},{l:'Absorción promedio',v:'42',u:'días'}],
+    signal:'<strong>+12–13 son ventas reales, no ajustes.</strong> Las retiradas rápidas de piso se recuperan en cuanto aparecen. A este ritmo Torres estará al 90% vendido antes de la entrega de julio 2026.',
+    details:[
+      {ic:'business',l:'Promotora',v:'Aedas Homes'},{ic:'bookmark',l:'Referencia',v:'#AS1I000005mL0KE'},
+      {ic:'construction',l:'Inicio de construcción',v:'01/02/2020'},{ic:'calendar_today',l:'Fecha de entrega',v:'Julio 2026'},
+      {ic:'newspaper',l:'Primera publicación',v:'3/10/2025'},{ic:'home',l:'Tipo',v:'Edificio nuevo'},
+      {ic:'bolt',l:'Consumo de energía',v:'<span class="ebadge eb-g">87 kWh m²/año</span>'},
+      {ic:'eco',l:'Emisiones',v:'<span class="ebadge eb-g">14 kg CO₂ m²/año</span>'}
+    ],
+    desc:'¿Conoces Torres del Parque? Un proyecto innovador ubicado en pleno corazón del barrio del Parque de Sabadell. Viviendas de 3 y 4 dormitorios con espacios abiertos que permiten óptimas condiciones de ventilación e iluminación. El edificio cuenta con certificado energético A y zonas comunes de primer nivel.',
+    amenities:['Ascensor','Puerta de seguridad','Piscina','Áreas verdes','Alarma','Garaje'],
+    units:[
+      {s:'torres1',n:'Planta en venta en Carrer de Gràcia, 45',t:'Planta',h:2,b:1,sz:'66 m²',p:'380.000 €',d:'—',pl:'2ª exterior',st:'a'},
+      {s:'torres2',n:'Planta en venta en Carrer de Gràcia, 45',t:'Planta',h:2,b:1,sz:'70 m²',p:'460.000 €',d:'23 días',pl:'4ª exterior',st:'r'},
+      {s:'torres3',n:'Planta en venta en Carrer de Gràcia, 45',t:'Planta',h:2,b:1,sz:'66 m²',p:'440.000 €',d:'34 días',pl:'4ª exterior',st:'r'},
+      {s:'torres1',n:'Bajo en venta en Carrer de Gràcia, 45',t:'Bajo',h:1,b:1,sz:'70 m²',p:'295.000 €',d:'51 días',pl:'Bajo exterior',st:'r'},
+      {s:'torres2',n:'Ático en venta en Carrer de Gràcia, 45',t:'Ático',h:2,b:1,sz:'66 m²',p:'560.000 €',d:'18 días',pl:'Ático exterior',st:'a'},
+      {s:'torres3',n:'Bajo en venta en Carrer de Gràcia, 45',t:'Bajo',h:1,b:1,sz:'70 m²',p:'298.000 €',d:'48 días',pl:'Bajo exterior',st:'a'},
+    ]
+  },
+  pc: {
+    name:'Obra nueva · Pau Casals · Turó Park', developer:'Metrovacesa',
+    addr:'Calle Canigo, 97, Horta, Sabadell',
+    price:'1.350.000 €', seed:'paucasals1',
+    kpis:[{l:'Unidades publicadas',v:'8'},{l:'Unidades activas',v:'5'},{l:'Unidades retiradas',v:'3'},{l:'Absorción promedio',v:'91',u:'días'}],
+    signal:'<strong>Señal de dificultad.</strong> Solo 3 retiradas en 5 meses y bajó precio hace 6 días. El segmento +1,3M€ tiene saturación en Sabadell. Revisar estrategia de precio.',
+    details:[
+      {ic:'business',l:'Promotora',v:'Metrovacesa'},{ic:'bookmark',l:'Referencia',v:'#MV2200003PCS'},
+      {ic:'construction',l:'Inicio de construcción',v:'15/06/2021'},{ic:'calendar_today',l:'Fecha de entrega',v:'Oct 2026'},
+      {ic:'newspaper',l:'Primera publicación',v:'3/10/2025'},{ic:'home',l:'Tipo',v:'Obra nueva'},
+      {ic:'bolt',l:'Consumo de energía',v:'<span class="ebadge eb-r">142 kWh m²/año</span>'},
+      {ic:'eco',l:'Emisiones',v:'<span class="ebadge eb-r">38 kg CO₂ m²/año</span>'}
+    ],
+    desc:'Obra nueva en el exclusivo barrio de Turó Park, Sabadell. Pisos de 2 habitaciones con acabados de lujo, vistas al parque y servicios premium. Orientado al segmento premium del mercado inmobiliario de Sabadell.',
+    amenities:['Ascensor','Conserjería 24h','Piscina','Spa','Garaje doble','Trastero'],
+    units:[
+      {s:'paucasals1',n:'Piso en venta en Calle Canigo, 97',t:'Planta',h:2,b:2,sz:'95 m²',p:'1.350.000 €',d:'—',pl:'3ª ext.',st:'a'},
+      {s:'paucasals2',n:'Piso en venta en Calle Canigo, 97',t:'Planta',h:2,b:2,sz:'98 m²',p:'1.400.000 €',d:'45 días',pl:'4ª ext.',st:'r'},
+      {s:'paucasals3',n:'Piso en venta en Calle Canigo, 97',t:'Planta',h:2,b:2,sz:'102 m²',p:'1.450.000 €',d:'62 días',pl:'5ª ext.',st:'a'},
+    ]
+  },
+  gran: {
+    name:'Residencial Granados', developer:'Kronos Homes',
+    addr:'Carrer de Granados, 45, Sabadell',
+    price:'385.000 €', seed:'granados1',
+    kpis:[{l:'Unidades publicadas',v:'18'},{l:'Unidades activas',v:'10'},{l:'Unidades retiradas',v:'8'},{l:'Absorción promedio',v:'31',u:'días'}],
+    signal:'<strong>Buena absorción sostenida.</strong> 8 retiradas en 4 meses con precio estable. Los áticos tienen leve tendencia alcista (+2,5%). Sin señales de ralentización.',
+    details:[
+      {ic:'business',l:'Promotora',v:'Kronos Homes'},{ic:'bookmark',l:'Referencia',v:'#KH3300004GRN'},
+      {ic:'construction',l:'Inicio de construcción',v:'10/01/2022'},{ic:'calendar_today',l:'Fecha de entrega',v:'Mar 2027'},
+      {ic:'newspaper',l:'Primera publicación',v:'15/08/2025'},{ic:'home',l:'Tipo',v:'Obra nueva'},
+      {ic:'bolt',l:'Consumo de energía',v:'<span class="ebadge eb-g">72 kWh m²/año</span>'},
+      {ic:'eco',l:'Emisiones',v:'<span class="ebadge eb-g">11 kg CO₂ m²/año</span>'}
+    ],
+    desc:'Residencial Granados ofrece viviendas de 2 y 3 habitaciones en una de las zonas más demandadas de Sabadell. Diseño contemporáneo, eficiencia energética clase A y proximidad a todos los servicios del barrio.',
+    amenities:['Ascensor','Piscina','Áreas verdes','Garaje','Trastero','Bicicletas'],
+    units:[
+      {s:'granados1',n:'Ático en venta en Carrer de Granados, 45',t:'Ático',h:3,b:2,sz:'85 m²',p:'560.000 €',d:'12 días',pl:'Ático ext.',st:'a'},
+      {s:'granados2',n:'Ático en venta en Carrer de Granados, 45',t:'Ático',h:2,b:1,sz:'72 m²',p:'480.000 €',d:'—',pl:'Ático ext.',st:'a'},
+      {s:'granados3',n:'Piso en venta en Carrer de Granados, 45',t:'Planta',h:3,b:2,sz:'80 m²',p:'440.000 €',d:'28 días',pl:'3ª ext.',st:'r'},
+      {s:'granados1',n:'Piso en venta en Carrer de Granados, 45',t:'Planta',h:2,b:1,sz:'68 m²',p:'385.000 €',d:'22 días',pl:'2ª ext.',st:'a'},
+    ]
+  },
+  cp: {
+    name:'Residencial Central Park', developer:'Via Célere',
+    addr:'Avda. Central, 12, Sabadell',
+    price:'420.000 €', seed:'centralpark1',
+    kpis:[{l:'Unidades publicadas',v:'18'},{l:'Unidades activas',v:'13'},{l:'Unidades retiradas',v:'5'},{l:'Absorción promedio',v:'54',u:'días'}],
+    signal:'<strong>Ritmo moderado con riesgo en 4h.</strong> Las plantas de 4 habitaciones llevan 0 retiradas. Cada 4h en el mix añade ~180 días de exposición acumulada. Revisar.',
+    details:[
+      {ic:'business',l:'Promotora',v:'Via Célere'},{ic:'bookmark',l:'Referencia',v:'#VC4400002CP'},
+      {ic:'construction',l:'Inicio de construcción',v:'01/03/2022'},{ic:'calendar_today',l:'Fecha de entrega',v:'Jun 2027'},
+      {ic:'newspaper',l:'Primera publicación',v:'20/09/2025'},{ic:'home',l:'Tipo',v:'Obra nueva'},
+      {ic:'bolt',l:'Consumo de energía',v:'<span class="ebadge eb-g">91 kWh m²/año</span>'},
+      {ic:'eco',l:'Emisiones',v:'<span class="ebadge eb-r">22 kg CO₂ m²/año</span>'}
+    ],
+    desc:'Residencial Central Park se sitúa junto al nuevo parque urbano de Sabadell. Viviendas de 2, 3 y 4 habitaciones con amplias terrazas. Proyecto sostenible con certificación energética A y diseño bioclimático.',
+    amenities:['Ascensor','Piscina','Pádel','Áreas verdes','Garaje','Trastero'],
+    units:[
+      {s:'centralpark1',n:'Piso en venta en Avda. Central, 12',t:'Planta',h:3,b:2,sz:'82 m²',p:'455.000 €',d:'31 días',pl:'4ª ext.',st:'r'},
+      {s:'centralpark2',n:'Piso en venta en Avda. Central, 12',t:'Planta',h:2,b:1,sz:'70 m²',p:'420.000 €',d:'18 días',pl:'2ª ext.',st:'a'},
+      {s:'centralpark3',n:'Piso en venta en Avda. Central, 12',t:'Planta',h:4,b:2,sz:'110 m²',p:'490.000 €',d:'—',pl:'5ª ext.',st:'a'},
+      {s:'centralpark1',n:'Piso en venta en Avda. Central, 12',t:'Planta',h:2,b:1,sz:'68 m²',p:'415.000 €',d:'24 días',pl:'3ª ext.',st:'r'},
+    ]
+  }
+};
+
+function showDetail(id) {
+  const p = PROMO_DATA[id];
+  document.getElementById('detailHdr').classList.add('show');
+  document.getElementById('normalHdr').classList.add('hidden');
+  document.getElementById('dthThumb').src = `https://picsum.photos/seed/${p.seed}/40/40`;
+  document.getElementById('dthName').textContent = p.name;
+  document.getElementById('dthAddr').textContent = p.addr;
+  document.getElementById('dthPrice').textContent = p.price;
+  document.getElementById('backLbl').textContent = p.developer;
+  ['res','act','det'].forEach(v=>{
+    document.getElementById('view-'+v).classList.add('hidden');
+    document.getElementById('view-'+v).classList.remove('show');
+  });
+  const det = document.getElementById('view-det');
+  det.classList.remove('hidden'); det.classList.add('show');
+  det.innerHTML = buildDetail(p);
+  document.getElementById('leftPanel').scrollTop = 0;
+}
+
+function goBack() {
+  document.getElementById('detailHdr').classList.remove('show');
+  document.getElementById('normalHdr').classList.remove('hidden');
+  document.getElementById('view-det').classList.add('hidden');
+  document.getElementById('view-det').classList.remove('show');
+  switchTab(lastTab);
+}
+
+function buildDetail(p) {
+  let kpi = `<div class="kpi4">${p.kpis.map(k=>`<div class="kpi4c"><div class="k4l">${k.l}</div><div class="k4v">${k.v}</div>${k.u?`<div class="k4u">${k.u}</div>`:''}</div>`).join('')}</div>`;
+  let sig = `<div class="dsig"><span class="dsig-icon">✦</span><span>${p.signal}</span></div>`;
+  let dgrid = `<div class="dgrid">${p.details.map(d=>`<div class="dc"><div class="dc-lbl"><span>${d.ic}</span>${d.l}</div><div class="dc-val">${d.v}</div></div>`).join('')}</div>`;
+  let desc = `<div class="sblk"><div class="sblk-title">Descripción</div><div class="desc-txt">${p.desc}</div><div class="see-more">Ver más ↓</div></div>`;
+  let amen = `<div class="sblk"><div class="sblk-title">Zonas comunes</div><div class="pills">${p.amenities.map(a=>`<div class="pill">${a}</div>`).join('')}</div></div>`;
+  let urows = p.units.map(u=>`<tr>
+    <td><img class="uth" src="https://picsum.photos/seed/${u.s}/36/36" alt="" /></td>
+    <td><div class="un">${u.n}</div><div class="ua">€/m² ${Math.round(parseInt(u.p.replace(/\D/g,''))/parseInt(u.sz))}</div></td>
+    <td>${u.t}</td><td>${u.h}</td><td>${u.b}</td><td>${u.sz}</td>
+    <td style="font-weight:600">${u.p}</td>
+    <td style="color:var(--t2)">${u.d}</td>
+    <td style="color:var(--t2)">${u.pl}</td>
+    <td><span class="sbadge ${u.st==='a'?'sb-a':'sb-r'}">${u.st==='a'?'Venta activa':'Retirado'}</span></td>
+  </tr>`).join('');
+  let units = `<div class="sblk" style="padding:0;overflow:hidden">
+    <div style="padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600">Unidades de la promoción</span><span style="font-size:12px;color:var(--t2);display:flex;align-items:center;gap:4px;cursor:pointer">⊞ Filtros</span></div>
+    <div style="overflow-x:auto"><table class="ut"><thead><tr><th style="width:50px"></th><th>Propiedad</th><th>Tipología</th><th>Habs</th><th>Baños</th><th>Tamaño</th><th>Precio</th><th>D. mercado</th><th>Planta</th><th>Estado</th></tr></thead><tbody>${urows}</tbody></table></div>
+    <div style="padding:10px 16px;border-top:1px solid var(--bdr)"><span style="font-size:12px;color:var(--blue);cursor:pointer">Ver más ↓</span></div>
+  </div>`;
+  const tlMonths = ['Ene 24','Feb 24','Mar 24','Abr 24','May 24','Jun 24','Jul 24','Ago 24'];
+  const tlData = [
+    {g:'Áticos', ic:'🏠', rows:[
+      {n:'Ático A · Carrer de Gràcia, 45', events:{1:'pub',3:'up',5:'dn'}},
+      {n:'Ático B · Carrer de Gràcia, 47', events:{2:'pub',4:'dn',6:'rm'}},
+    ]},
+    {g:'Plantas', ic:'🏢', rows:[
+      {n:'Planta 3A · Carrer de Gràcia, 45', events:{0:'pub',3:'up',4:'dn'}},
+      {n:'Planta 3B · Carrer de Gràcia, 45', events:{1:'pub',4:'rm'}},
+      {n:'Planta 2A · Carrer de Gràcia, 47', events:{2:'pub',5:'up',7:'dn'}},
+    ]},
+    {g:'Bajos', ic:'🏡', rows:[
+      {n:'Bajo 1 · Carrer de Gràcia, 45', events:{0:'pub',2:'up',5:'rm'}},
+    ]},
+  ];
+  const dotIcon = {pub:'P', up:'↑', dn:'↓', rm:'×'};
+  function tlDot(type, col) {
+    return `<div class="tl-cell-inner"><div class="tl-bar"></div><div class="tl-dot ${type}" style="left:50%">${dotIcon[type]}</div></div>`;
+  }
+  function tlEmpty() {
+    return `<div class="tl-cell-inner"><div class="tl-bar"></div></div>`;
+  }
+  let tlBody = '';
+  tlData.forEach(g=>{
+    tlBody += `<tr class="tl-grp"><td class="tl-grp-cell" colspan="${tlMonths.length+1}"><div class="tl2-grp-inner"><span class="tl2-chevron">▼</span><span>${g.ic} ${g.g}</span><span class="tl2-cnt">${g.rows.length} uds</span></div></td></tr>`;
+    g.rows.forEach(r=>{
+      let cells = tlMonths.map((_,i)=>`<td class="tl-month-cell">${r.events[i]?tlDot(r.events[i],i):tlEmpty()}</td>`).join('');
+      tlBody += `<tr class="tl-sub"><td class="tl-name">${r.n}</td>${cells}</tr>`;
+    });
+  });
+  let tlLegend = `<div style="display:flex;gap:12px;align-items:center;padding:8px 16px 12px;flex-wrap:wrap">
+    ${[['pub','#22C55E','Publicado'],['up','#FACC15','Subida precio'],['dn','#F87171','Bajada precio'],['rm','#CBD5E1','Retirado']].map(([t,c,l])=>`<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t3)"><span style="width:12px;height:12px;border-radius:50%;background:${c};display:inline-block;flex-shrink:0"></span>${l}</span>`).join('')}
+  </div>`;
+  let timeline = `<div class="sblk" style="padding:0;overflow:hidden">
+    <div style="padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600">Histórico de unidades</span><span style="font-size:11px;color:var(--t3)">Q1–Q3 2024</span></div>
+    <div class="tl2-wrap">
+      <table class="tl2">
+        <thead><tr><th style="min-width:220px">Unidad</th>${tlMonths.map(m=>`<th class="tl-month">${m}</th>`).join('')}</tr></thead>
+        <tbody>${tlBody}</tbody>
+      </table>
+    </div>
+    ${tlLegend}
+  </div>`;
+  let docs = `<div class="sblk">
+    <div class="doc-hdr"><span style="font-size:13px;font-weight:600">Documentos</span><button class="ai-sum-btn" onclick="askDocSummary()"><span class="ms-ic sm">auto_awesome</span> Resumen con IA</button></div>
+    ${['Memoria de calidades (729kb)','Plano de distribución','Certificado energético','Licencia de obra'].map((d,i)=>`
+    <div class="doc-row">
+      <span class="doc-ico ms-ic md">description</span>
+      <span class="doc-name">${d}</span>
+      <span class="doc-date">11/8/202${4+i}</span>
+      <span class="doc-dl">↓</span>
+    </div>`).join('')}
+  </div>`;
+  return kpi + sig + dgrid + desc + amen + units + timeline + docs;
+}
+
+// ── CHAT ────────────────────────────────────────────────
+const QS = {
+  q1:{q:'¿A qué precio puedo salir con áticos?',
+    intro:'Los comparables activos muestran un rango sólido de <strong>3.200–3.800€/m²</strong> para áticos en la zona. Torres del Parque lidera con 3.800€/m² y 28 días de absorción. Granados está en el tramo bajo con precio estable.',
+    chart:cQ1, concl:{type:'green',title:'Rango recomendado de salida',items:['Ático 3h → 3.500–3.800€/m²','Ático 2h → 3.400–3.600€/m²','Planta 2-3h → 3.000–3.200€/m²']},
+    nqs:[['¿Qué tipología me recomiendas?','q2'],['Si lanzo 60 uds, ¿cuánto tardo?','q3']]},
+  q2:{q:'¿Qué tipología me recomiendas?',
+    intro:'El mix óptimo concentra el <strong>85% en pisos y áticos de 2-3 habitaciones</strong>. Los bajos tienen demanda débil en Sabadell. La superficie que mejor funciona: 70–85m².',
+    chart:cQ2, warn:'Estimación orientativa basada en comportamiento histórico de unidades similares. No es una proyección garantizada.',
+    nqs:[['Si lanzo 60 uds, ¿cuánto tardo?','q3'],['¿A qué precio puedo salir con áticos?','q1']]},
+  q3:{q:'Si lanzo 60 uds, ¿cuánto tardo?',
+    intro:'Con 60 unidades el plazo varía enormemente según el mix. El escenario A con mix óptimo te da <strong>8–10 meses</strong>. Incluir bajos o 4h alarga el proceso de forma significativa.',
+    chart:cQ3, warn:'Estimación orientativa basada en comportamiento histórico de unidades similares. No es una proyección garantizada.',
+    concl:{type:'blue',title:'✦  Escenario A es el que presentarías al banco',items:['Mix óptimo: áticos + plantas 2-3h, sin bajos ni 4h.']},
+    nqs:[['¿Qué tipología me recomiendas?','q2'],['¿A qué precio puedo salir con áticos?','q1']]},
+  q4:{q:'¿Qué hueco no cubre nadie?',
+    intro:'El hueco más claro son los <strong>áticos de 2 habitaciones</strong>. Solo 5 unidades activas en toda la zona, absorción 18–31 días. Torres del Parque casi las tiene vendidas.',
+    chart:cQ4,
+    nqs:[['Compara Torres del Parque vs Pau Casals','q5'],['¿A qué precio puedo salir con áticos?','q1']]},
+  q5:{q:'Compara Torres del Parque vs Pau Casals',
+    intro:'La diferencia es estructural. Torres del Parque está en ritmo de líder: <strong>+4,8% en precio</strong> y 3,2 uds/mes. Pau Casals no vende — bajó precio y sigue sin mover.',
+    chart:cQ5,
+    nqs:[['¿Qué hueco no cubre nadie?','q4'],['¿A qué precio puedo salir con áticos?','q1']]}
+};
+
+function dlRow(csvData,filename){
+  return`<div class="chart-dl-row">
+    <button class="chart-dl-btn" onclick="dlPng(this)">↓ PNG</button>
+    <button class="chart-dl-btn" onclick="dlCsv(${JSON.stringify(csvData)},${JSON.stringify(filename)})">↓ Excel</button>
+  </div>`;
+}
+function dlPng(btn){
+  const box=btn.closest('.cbox-wrap').querySelector('.cbox');
+  const w=window.open('','_blank','width=600,height=400');
+  w.document.write(`<html><body style="margin:16px;font-family:Inter,sans-serif;background:#F8FAFC">${box.outerHTML}</body></html>`);
+  w.document.close(); setTimeout(()=>w.print(),300);
+}
+function dlCsv(rows,name){
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=name+'.csv'; a.click();
+}
+function cQ1(){
+  const csv=[['Tipología','€/m²','Cambio'],['Ático 3h · Torres del Parque','3800','+3.8%'],['Ático 3h · Creu Alta','3600','+2.5%'],['Ático 2h · Torres del Parque','3500','+3.1%'],['Planta 2h · Torres del Parque','3300','+3.3%'],['Ático 2h · Granados','3200','estable']];
+  return`<div class="cbox-wrap"><div class="cbox"><div class="cttl">Comparables €/m² por tipología</div><div class="hb-row">${[
+    {l:'Ático 3h · Torres del Parque',v:'3.800€',w:110,d:'↑+3,8%',c:'f-gd'},
+    {l:'Ático 3h · Creu Alta',v:'3.600€',w:104,d:'↑+2,5%',c:'f-gm'},
+    {l:'Ático 2h · Torres del Parque',v:'3.500€',w:101,d:'↑+3,1%',c:'f-gm'},
+    {l:'Planta 2h · Torres del Parque',v:'3.300€',w:95,d:'↑+3,3%',c:'f-bl'},
+    {l:'Ático 2h · Granados',v:'3.200€',w:92,d:'estable',c:'f-bl'},
+  ].map(b=>`<div class="hb-item"><div class="hb-lbl">${b.l}</div><div class="hb-track"><div class="hb-fill ${b.c}" style="width:${b.w}px"></div><span class="hb-val">${b.v}</span><span class="hb-d ${b.d.startsWith('↑')?'up':'fl'}">${b.d}</span></div></div>`).join('')}</div></div>${dlRow(csv,'comparables_precio')}</div>`;}
+function cQ2(){
+  const csv=[['Tipología','Mix %','Absorción'],['Áticos 2-3h','40%','18-28 días'],['Plantas 2-3h','45%','22-34 días'],['Bajos ext.','15%','~40 días']];
+  return`<div class="cbox-wrap"><div class="cbox"><div class="cttl">Mix recomendado + absorción</div><div class="vb-area" style="height:100px">${[
+    {p:'40%',h:80,c:'#34D399',l:'Áticos<br>2-3h',d:'18-28d'},
+    {p:'45%',h:90,c:'#93C5FD',l:'Plantas<br>2-3h',d:'22-34d'},
+    {p:'15%',h:30,c:'#D1D5DB',l:'Bajos<br>ext.',d:'~40d'},
+  ].map(c=>`<div class="vb-col"><div class="vb-pct">${c.p}</div><div class="vb-bar" style="height:${c.h}px;background:${c.c}"></div><div class="vb-lbl">${c.l}</div><div class="vb-days">${c.d}</div></div>`).join('')}</div></div>${dlRow(csv,'mix_tipologias')}</div>`;}
+function cQ3(){
+  const csv=[['Escenario','Meses'],['A - mix óptimo','8-10'],['B - conservador con bajos','14-18'],['C - incluye 4h','22-28']];
+  return`<div class="cbox-wrap"><div class="cbox"><div class="cttl">Escenarios de comercialización · 60 uds</div><div class="sc-rows">${[
+    {l:'Escenario A<br><span style="font-size:9px;color:var(--t3)">mix óptimo</span>',r:'8–10 meses',w:110,bg:'#059669'},
+    {l:'Escenario B<br><span style="font-size:9px;color:var(--t3)">mix conservador con bajos</span>',r:'14–18 meses',w:190,bg:'#F59E0B'},
+    {l:'Escenario C<br><span style="font-size:9px;color:var(--t3)">incluye 4h</span>',r:'22–28 meses',w:280,bg:'#EF4444'},
+  ].map(s=>`<div class="sc-item"><div class="sc-lbl">${s.l}</div><div class="sc-bar" style="width:${s.w}px;background:${s.bg}"><span>${s.r}</span></div></div>`).join('')}</div></div>${dlRow(csv,'escenarios_comercializacion')}</div>`;}
+function cQ4(){
+  const csv=[['Promoción','Activos','Absorción','Señal'],['Torres del Parque','3','18 días','casi vendidas'],['Creu Alta','2','24 días','estable'],['Granados','1','31 días','estable'],['Pau Casals','0','—','dificultad']];
+  return`<div class="cbox-wrap"><div class="cbox" style="padding:10px 0 0"><div class="cttl" style="padding:0 12px 10px">Áticos 2h activos por promoción</div><table class="cct"><thead><tr><th>Promoción</th><th>Activos</th><th>Absorción</th><th>Señal IA</th></tr></thead><tbody>${[
+    {n:'Torres del Parque',u:'3 uds',a:'18 días',s:'✦ casi vendidas',c:'up'},
+    {n:'Creu Alta',u:'2 uds',a:'24 días',s:'estable',c:'fl'},
+    {n:'Granados',u:'1 ud',a:'31 días',s:'estable',c:'fl'},
+    {n:'Pau Casals',u:'0 uds',a:'—',s:'⚠ dificultad',c:'dn'},
+  ].map(r=>`<tr><td>${r.n}</td><td>${r.u}</td><td>${r.a}</td><td><span class="${r.c}">${r.s}</span></td></tr>`).join('')}<tr class="rtot"><td colspan="4">✦ 5 uds activas en toda la zona</td></tr></tbody></table></div>${dlRow(csv,'gap_aticos_2h')}</div>`;}
+function cQ5(){
+  const csv=[['Indicador','Torres del Parque','Pau Casals'],['Retiradas','16 de 24 (67%)','3 de 8 (38%)'],['Mov. precio','↑ +4,8%','↓ −2,8%'],['Ritmo mensual','~3,2 uds/mes','~0,6 uds/mes'],['Señal IA','Líder','En dificultad']];
+  return`<div class="cbox-wrap"><div class="cbox" style="padding:10px 0 0"><div class="cttl" style="padding:0 12px 10px">Comparativa side by side</div><table class="cmpt"><thead><tr><th></th><th class="cg">Torres del Parque</th><th class="cr">Pau Casals</th></tr></thead><tbody>${[
+    {l:'Retiradas',g:'16 de 24 (67%)',r:'3 de 8 (38%)'},
+    {l:'Mov. precio',g:'↑ +4,8%',r:'↓ −2,8%'},
+    {l:'Ritmo mensual',g:'~3,2 uds/mes',r:'~0,6 uds/mes'},
+    {l:'Señal IA',g:'✦ Líder',r:'⚠ En dificultad'},
+  ].map(r=>`<tr><td>${r.l}</td><td class="cg">${r.g}</td><td class="cr">${r.r}</td></tr>`).join('')}</tbody></table></div>${dlRow(csv,'comparativa_torres_paucasals')}</div>`;}
+
+let cChips=[], cFmt=null;
+
+function ask(qid){
+  const q=QS[qid]; clearConv(); addUser(q.q); showTyping(()=>addAI(q));
+}
+function clearConv(){
+  const c=document.getElementById('msgs');
+  document.getElementById('init-qs').classList.add('hidden');
+  while(c.lastChild!==document.getElementById('msg-init')) c.removeChild(c.lastChild);
+  cChips=[]; cFmt=null;
+}
+function addUser(t){ app(`<div class="msg-u"><div class="bub-u">${t}</div></div>`); }
+function addAI(q){
+  let h=`<div class="msg-a"><div class="ai-txt">${q.intro}</div>${q.chart()}`;
+  if(q.warn) h+=`<div class="warn"><span class="w-ic">⚠</span><span>${q.warn}</span></div>`;
+  if(q.concl) h+=`<div class="concl ${q.concl.type}"><div class="concl-ttl">${q.concl.title}</div>${q.concl.items.map(i=>`<div class="concl-item">· ${i}</div>`).join('')}</div>`;
+  h+=`<div class="nxt-sect"><div class="nxt-lbl">Siguiente paso</div>${q.nqs.map(([t,id])=>`<div class="nxt-q" onclick="ask('${id}')"><span class="nq-ic">✦</span>${t}</div>`).join('')}</div>`;
+  h+=`<button class="rpt-card" onclick="startReport()"><span class="rpt-card-ico ms-ic lg">description</span><div class="rpt-card-body"><div class="rpt-card-title">Reporte de promoción</div><div class="rpt-card-sub">Crea un reporte completo de la zona listo para presentar</div></div><span class="rpt-card-arr ms-ic md">chevron_right</span></button></div>`;
+  app(h);
+}
+function showTyping(cb){
+  const el=document.createElement('div'); el.id='typ';
+  el.innerHTML=`<div class="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>`;
+  document.getElementById('msgs').appendChild(el); scrl();
+  setTimeout(()=>{el.remove();cb();},800);
+}
+function app(html){
+  const c=document.getElementById('msgs'),d=document.createElement('div');
+  d.innerHTML=html; c.appendChild(d.firstChild); scrl();
+}
+function scrl(){setTimeout(()=>{const c=document.getElementById('msgs');c.scrollTop=c.scrollHeight;},40);}
+
+function startReport(){
+  cChips=[]; cFmt=null;
+  const s1=document.createElement('div'); s1.id='rs1'; s1.className='msg-a';
+  s1.innerHTML=`<div class="rep-txt">¿Qué quieres incluir en el informe?</div><div class="chips-row">
+    <div class="chip" onclick="tChip(this,'abs')"><span style="color:var(--purple);font-size:10px">✦</span> Análisis de absorción</div>
+    <div class="chip" onclick="tChip(this,'land')"><span style="color:var(--purple);font-size:10px">✦</span> Competitive landscape</div>
+    <div class="chip" onclick="tChip(this,'val')"><span style="color:var(--purple);font-size:10px">✦</span> Valuation model</div>
+  </div>`;
+  document.getElementById('msgs').appendChild(s1); scrl();
+}
+function tChip(el,id){
+  el.classList.toggle('sel');
+  cChips=el.classList.contains('sel')?[...cChips,id]:cChips.filter(c=>c!==id);
+  if(cChips.length>0&&!document.getElementById('rs2')) rStep2();
+}
+function rStep2(){
+  const s2=document.createElement('div'); s2.id='rs2'; s2.className='msg-a';
+  s2.innerHTML=`<div class="rep-txt">¿En qué formato lo quieres?</div><div class="fmt-row">
+    <div class="fmtc" onclick="pFmt(this,'pdf')"><span class="fmt-ic">📄</span>PDF<span class="fmt-sub">Para presentar</span></div>
+    <div class="fmtc" onclick="pFmt(this,'ppt')"><span class="fmt-ic">📊</span>PPT<span class="fmt-sub">Para compartir</span></div>
+    <div class="fmtc" onclick="pFmt(this,'xlsx')"><span class="fmt-ic">📋</span>Excel<span class="fmt-sub">Para trabajar</span></div>
+  </div>`;
+  document.getElementById('msgs').appendChild(s2); scrl();
+}
+function pFmt(el,f){
+  el.closest('.fmt-row').querySelectorAll('.fmtc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); cFmt=f;
+  if(!document.getElementById('rs3')) rStep3();
+}
+function rStep3(){
+  const s3=document.createElement('div'); s3.id='rs3'; s3.className='msg-a';
+  s3.innerHTML=`<div class="rep-txt">¿Quieres añadir algo más antes de generarlo o lo genero con esto?</div><div class="conf-row">
+    <button class="btn-sec" onclick="document.getElementById('chatInp').focus()">Añadir contexto</button>
+    <button class="btn-pri" onclick="genReport()">✦ Generar ahora</button>
+  </div>`;
+  document.getElementById('msgs').appendChild(s3); scrl();
+}
+function genReport(){
+  const icons={pdf:'📄',ppt:'📊',xlsx:'📋'}, lbls={pdf:'PDF',ppt:'PPT',xlsx:'Excel'}, f=cFmt||'pdf';
+  showTyping(()=>{
+    const el=document.createElement('div'); el.className='msg-a';
+    el.innerHTML=`<div class="ai-txt">Informe listo.</div><div class="dl-card">
+      <span class="dl-ic">${icons[f]}</span>
+      <div class="dl-info"><div class="dl-name">Sabadell Q1 2025 · Competitive landscape.${f}</div><div class="dl-sub">Generado ahora · ${lbls[f]}</div></div>
+      <button class="btn-dl" onclick="this.textContent='✓ Listo'">↓ Descargar</button>
+    </div>`;
+    document.getElementById('msgs').appendChild(el); scrl();
+  });
+}
+
+function sendMsg(){
+  const inp=document.getElementById('chatInp'), t=inp.value.trim(); if(!t) return;
+  clearConv(); addUser(t); inp.value=''; inp.placeholder='Escribe un mensaje';
+  showTyping(()=>{
+    const el=document.createElement('div'); el.className='msg-a';
+    el.innerHTML=`<div class="ai-txt">Analizando "<strong>${t}</strong>"...<br><br>Procesando datos de Sabadell. Prueba estas preguntas:</div>
+    <div class="nxt-sect">${Object.entries(QS).map(([id,q])=>`<div class="nxt-q" onclick="ask('${id}')"><span class="nq-ic">✦</span>${q.q}</div>`).join('')}</div>`;
+    document.getElementById('msgs').appendChild(el); scrl();
+  });
+}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+
+// Init
+switchTab('act');
+</script>
+</body>
+</html>
